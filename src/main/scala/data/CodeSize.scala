@@ -5,8 +5,8 @@ import scala.scalajs.js
 import typings.chartJs.mod.*
 import utils.randomColor
 
-class codeSize(d: js.Array[js.Dynamic]) extends LineStacked {
-  override lazy val chartTitle: String = "Code Size"
+class CodeSize(d: js.Array[js.Dynamic]) extends LineStacked {
+  override lazy val chartTitle: String = "Code Size of Entire Repository"
   override lazy val xLabel = "commit hash"
   override lazy val yLabel = "lines of code"
 
@@ -15,11 +15,11 @@ class codeSize(d: js.Array[js.Dynamic]) extends LineStacked {
       .filter { k => k != "meta" && k != "SUM" }
 
     new ChartData {
-      labels = d.map { _.selectDynamic("meta").selectDynamic("commit").asInstanceOf[String] }
+      labels = d.map { _.meta.commit.asInstanceOf[String] }
       datasets = keys.map { key =>
         new ChartDataSets {
           label = key
-          data = d.map { _.selectDynamic(key).selectDynamic("code").asInstanceOf[Double] }
+          data = d.map { _.selectDynamic(key).code.asInstanceOf[Double] }
           backgroundColor = randomColor()
         }
       }

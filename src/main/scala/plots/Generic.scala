@@ -3,14 +3,14 @@ package plots
 import typings.chartJs.mod.*
 import com.raquo.laminar.api.L.{*, given}
 
+import org.scalajs.dom
+
 trait Generic {
   val chartConfig: ChartConfiguration
 
   def draw(): HtmlElement = {
     var optChart: Option[Chart] = None
     canvasTag(
-      width := "100%",
-      height := "500px",
       onMountUnmountCallback(
         mount = { nodeCtx => 
           val ctx = nodeCtx.thisNode.ref
