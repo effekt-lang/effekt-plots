@@ -1,10 +1,28 @@
 package data
 
-import plots.Line
+import plots.LineStacked
 import scala.scalajs.js
+import typings.chartJs.mod.*
+import utils.randomColor
 
-object codeSize extends Line {
-  val y = js.Array(8, 22, 31, 36, 48, 17, 25)
-  val x = y.zipWithIndex.map { case (_, i) => i }
-  val test = 42
+class codeSize(d: js.Array[js.Dynamic]) extends LineStacked {
+  override lazy val chartTitle: String = "Code Size"
+  override lazy val xLabel = "commit hash"
+  override lazy val yLabel = "lines of code"
+
+  lazy val chartData = {
+    val keys = js.Object.keys(d(0).asInstanceOf[js.Object])
+      .filter { k => k != "meta" && k != "SUM" }
+
+    new ChartData {
+      labels = d.map { _.selectDynamic("meta").selectDynamic("commit").asInstanceOf[String] }
+      datasets = keys.map { key =>
+        new ChartDataSets {
+          label = key
+          data = d.map { _.selectDynamic(key).selectDynamic("code").asInstanceOf[Double] }
+          backgroundColor = randomColor()
+        }
+      }
+    }
+  }
 }

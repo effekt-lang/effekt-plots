@@ -10,6 +10,7 @@ lazy val root = project
 
     Compile / npmDependencies ++= Seq(
       "chart.js" -> "2.9.4",
+      // we can't use newer chart.js since @types/chart.js is out of date
       "@types/chart.js" -> "2.9.41",
     ),
 
