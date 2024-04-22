@@ -13,9 +13,11 @@ def loadData(name: String): js.Array[js.Dynamic] =
 
 @main
 def main(): Unit =
+  val phasesData = loadData("phases")
   val codeSizeData = loadData("cloc")
   val metricsData = loadData("metrics")
   val plots = sectionTag(
+    PhaseTimes(phasesData).draw(),
     CodeSize(codeSizeData).draw(),
     MemoryUsage(metricsData).draw(),
     TimeMeasure(metricsData).draw(),

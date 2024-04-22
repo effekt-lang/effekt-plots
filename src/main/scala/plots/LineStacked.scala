@@ -24,13 +24,10 @@ trait LineStacked extends Generic {
       scales = new ChartScales {
         xAxes = js.Array(
           new ChartXAxe {
-            // `type` = "category"
             stacked = true
-            // labels = js.Array("1", "2", "3")
             // title = new ChartTitleOptions {
             //   text = xLabel
             // }
-            // display = true
           }
         )
         yAxes = js.Array(
@@ -39,12 +36,10 @@ trait LineStacked extends Generic {
             ticks = new TickOptions {
               beginAtZero = true
             }
-            // labels = js.Array("1", "2", "3")
             stacked = true
             // title = new ChartTitleOptions {
             //   text = yLabel
             // }
-            // display = true
           }
         )
       }
