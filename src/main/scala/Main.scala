@@ -16,8 +16,10 @@ def main(): Unit =
   val phasesData = loadData("phases")
   val codeSizeData = loadData("cloc")
   val metricsData = loadData("metrics")
+  val buildTimeData = loadData("build")
   val plots = sectionTag(
     PhaseTimes(phasesData).draw(),
+    BuildTime(buildTimeData).draw(),
     CodeSize(codeSizeData).draw(),
     MemoryUsage(metricsData).draw(),
     TimeMeasure(metricsData).draw(),
