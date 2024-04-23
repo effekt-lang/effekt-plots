@@ -2,4 +2,4 @@
 set -e
 
 cd ../effekt/
-cloc effekt/ libraries/ examples/ --json | jq 'del(.header)'
+cloc effekt/ libraries/ examples/ --json --read-lang-def ../generate/cloc.cfg | jq 'del(.header)'
