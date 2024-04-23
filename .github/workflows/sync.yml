@@ -1,0 +1,68 @@
+name: Sync benchmarks
+
+on:
+  # can only be triggered manually
+  workflow_dispatch:
+    inputs:
+      effekt_commit:
+        description: "Commit SHA of Effekt submodule to checkout and build. If omitted, the latest commit is chosen. (OPTIONAL)"
+        required: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+        
+      - name: Checkout given commit
+        if: "${{ github.event.inputs.effekt_commit != '' }}"
+        run: |
+          git -C effekt/ checkout ${{ github.event.inputs.effekt_commit }}
+
+      - name: Update submodule
+        run: |
+          git submodule update --recursive --remote --init
+
+      - name: Install generator dependencies
+        run: |
+          sudo apt update
+          sudo apt install jq cloc
+
+      - name: Generate data
+        run: |
+          cd generate/ && ./main.sh
+
+      - name: Open Pull Request
+        # here we have to make sure that trigger event is on 'manual'
+        # since 'on push' could cause a infinite loop of actions triggering each other
+        if: github.event_name == 'workflow_dispatch'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          add-paths: |
+            effekt/
+            data/
+          commit-message: "Github Action: update compiler"
+          base: master
+          branch: action/update-compiler
+          title: "[Github Action] Update compiler"
+          body: "Update Effekt compiler."
+          reviewers: |
+            b-studios
+            marvinborner
+          draft: false
