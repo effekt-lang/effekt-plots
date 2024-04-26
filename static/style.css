@@ -9,7 +9,10 @@ div#main section {
     justify-content: center;
 }
 
-div#main section canvas {
-    max-width: 40vw !important;
-    max-height: 40vh !important;
+/* not phone / tablet */
+@media(min-width: 1300px) {
+    div#main section canvas {
+        max-width: 40vw !important;
+        max-height: 40vh !important;
+    }
 }
