@@ -6,9 +6,9 @@ import typings.chartJs.mod.*
 import utils.randomColor
 
 class TimeMeasure(d: js.Array[js.Dynamic]) extends Line {
-  override lazy val chartTitle: String = "Time for all Benchmarks"
+  override lazy val chartTitle: String = "Accumulated Time of Benchmarks"
   override lazy val xLabel = "commit hash"
-  override lazy val yLabel = "time"
+  override lazy val yLabel = "time in seconds"
 
   lazy val chartData = {
     new ChartData {

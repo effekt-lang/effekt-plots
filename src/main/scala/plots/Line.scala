@@ -23,13 +23,22 @@ trait Line extends Generic {
       }
       scales = new ChartScales {
         xAxes = js.Array(
-          new ChartXAxe { }
+          new ChartXAxe {
+            scaleLabel = new ScaleTitleOptions {
+              display = true
+              labelString = xLabel
+            }
+          }
         )
         yAxes = js.Array(
           new ChartYAxe {
             `type` = "linear"
             ticks = new TickOptions {
               beginAtZero = true
+            }
+            scaleLabel = new ScaleTitleOptions {
+              display = true
+              labelString = yLabel
             }
           }
         )

@@ -6,9 +6,9 @@ import typings.chartJs.mod.*
 import utils.randomColor
 
 class PhaseTimes(d: js.Array[js.Dynamic]) extends LineStacked {
-  override lazy val chartTitle: String = "Phase Times of Entire Repository"
+  override lazy val chartTitle: String = "Phase Times of Benchmarks"
   override lazy val xLabel = "commit hash"
-  override lazy val yLabel = "lines of code"
+  override lazy val yLabel = "time in seconds"
 
   lazy val chartData = {
     val keys = js.Object.keys(d(0).asInstanceOf[js.Object])

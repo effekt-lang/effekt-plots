@@ -8,7 +8,7 @@ import utils.randomColor
 class BuildTime(d: js.Array[js.Dynamic]) extends Line {
   override lazy val chartTitle: String = "Time for Building Effekt"
   override lazy val xLabel = "commit hash"
-  override lazy val yLabel = "time"
+  override lazy val yLabel = "time in seconds"
 
   lazy val chartData = {
     new ChartData {

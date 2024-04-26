@@ -25,9 +25,10 @@ trait LineStacked extends Generic {
         xAxes = js.Array(
           new ChartXAxe {
             stacked = true
-            // title = new ChartTitleOptions {
-            //   text = xLabel
-            // }
+            scaleLabel = new ScaleTitleOptions {
+              display = true
+              labelString = xLabel
+            }
           }
         )
         yAxes = js.Array(
@@ -37,9 +38,10 @@ trait LineStacked extends Generic {
               beginAtZero = true
             }
             stacked = true
-            // title = new ChartTitleOptions {
-            //   text = yLabel
-            // }
+            scaleLabel = new ScaleTitleOptions {
+              display = true
+              labelString = yLabel
+            }
           }
         )
       }

@@ -6,9 +6,9 @@ import typings.chartJs.mod.*
 import utils.randomColor
 
 class MemoryUsage(d: js.Array[js.Dynamic]) extends Line {
-  override lazy val chartTitle: String = "Memory Usage for all Benchmarks"
+  override lazy val chartTitle: String = "Memory Usage of Benchmarks"
   override lazy val xLabel = "commit hash"
-  override lazy val yLabel = "memory usage"
+  override lazy val yLabel = "memory usage in kilobyte"
 
   lazy val chartData = {
     new ChartData {
