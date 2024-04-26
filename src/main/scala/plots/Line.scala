@@ -24,6 +24,16 @@ trait Line extends Generic {
       scales = new ChartScales {
         xAxes = js.Array(
           new ChartXAxe {
+            `type` = "time"
+            distribution = typings.chartJs.chartJsStrings.series
+            time = new TimeScale {
+              //unit = TimeUnit.hour
+              unit = TimeUnit.day
+              displayFormats = new TimeDisplayFormat {
+                hour = "MM YYYY"
+                day = "MM YYYY"
+              }
+            }
             scaleLabel = new ScaleTitleOptions {
               display = true
               labelString = xLabel

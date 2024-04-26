@@ -7,7 +7,7 @@ import utils.randomColor
 
 class PhaseTimes(d: js.Array[js.Dynamic]) extends LineStacked {
   override lazy val chartTitle: String = "Phase Times of Benchmarks"
-  override lazy val xLabel = "commit hash"
+  override lazy val xLabel = "benchmark date"
   override lazy val yLabel = "time in seconds"
 
   lazy val chartData = {
@@ -15,7 +15,7 @@ class PhaseTimes(d: js.Array[js.Dynamic]) extends LineStacked {
       .filter { k => k != "meta" && k != "total" }
 
     new ChartData {
-      labels = d.map { _.meta.commit.asInstanceOf[String] }
+      labels = d.map { e => new js.Date(e.meta.currentDate.asInstanceOf[String].toDouble * 1000) }
       datasets = keys.map { key =>
         new ChartDataSets {
           label = key

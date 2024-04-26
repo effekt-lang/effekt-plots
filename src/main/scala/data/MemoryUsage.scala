@@ -7,12 +7,12 @@ import utils.randomColor
 
 class MemoryUsage(d: js.Array[js.Dynamic]) extends Line {
   override lazy val chartTitle: String = "Memory Usage of Benchmarks"
-  override lazy val xLabel = "commit hash"
+  override lazy val xLabel = "benchmark date"
   override lazy val yLabel = "memory usage in kilobyte"
 
   lazy val chartData = {
     new ChartData {
-      labels = d.map { _.meta.commit.asInstanceOf[String] }
+      labels = d.map { e => new js.Date(e.meta.currentDate.asInstanceOf[String].toDouble * 1000) }
       datasets = js.Array(
         new ChartDataSets {
           label = "memory usage (kB)"

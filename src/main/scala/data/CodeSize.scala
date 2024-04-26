@@ -7,7 +7,7 @@ import utils.randomColor
 
 class CodeSize(d: js.Array[js.Dynamic]) extends LineStacked {
   override lazy val chartTitle: String = "Code Size of Entire Repository"
-  override lazy val xLabel = "commit hash"
+  override lazy val xLabel = "benchmark date"
   override lazy val yLabel = "lines of code"
 
   lazy val chartData = {
@@ -15,7 +15,7 @@ class CodeSize(d: js.Array[js.Dynamic]) extends LineStacked {
       .filter { k => k != "meta" && k != "SUM" }
 
     new ChartData {
-      labels = d.map { _.meta.commit.asInstanceOf[String] }
+      labels = d.map { e => new js.Date(e.meta.currentDate.asInstanceOf[String].toDouble * 1000) }
       datasets = keys.map { key =>
         new ChartDataSets {
           label = key

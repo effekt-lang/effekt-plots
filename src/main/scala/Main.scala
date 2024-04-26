@@ -11,13 +11,12 @@ def loadData(name: String): js.Array[js.Dynamic] =
   xhr.send(null)
   js.JSON.parse(xhr.responseText).asInstanceOf[js.Array[js.Dynamic]]
 
-@main
-def main(): Unit =
+def renderPlots(timeFilter: js.Date => Boolean) =
   val phasesData = loadData("phases")
   val codeSizeData = loadData("cloc")
   val metricsData = loadData("metrics")
   val buildTimeData = loadData("build")
-  val plots = sectionTag(
+  sectionTag(
     PhaseTimes(phasesData).draw(),
     BuildTime(buildTimeData).draw(),
     CodeSize(codeSizeData).draw(),
@@ -25,4 +24,8 @@ def main(): Unit =
     TimeMeasure(metricsData).draw(),
     CpuUsage(metricsData).draw()
   )
+
+@main
+def main(): Unit =
+  val plots = renderPlots(_ => true)
   renderOnDomContentLoaded(dom.document.getElementById("main"), plots)

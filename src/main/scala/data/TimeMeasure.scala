@@ -7,12 +7,12 @@ import utils.randomColor
 
 class TimeMeasure(d: js.Array[js.Dynamic]) extends Line {
   override lazy val chartTitle: String = "Accumulated Time of Benchmarks"
-  override lazy val xLabel = "commit hash"
+  override lazy val xLabel = "benchmark date"
   override lazy val yLabel = "time in seconds"
 
   lazy val chartData = {
     new ChartData {
-      labels = d.map { _.meta.commit.asInstanceOf[String] }
+      labels = d.map { e => new js.Date(e.meta.currentDate.asInstanceOf[String].toDouble * 1000) }
       datasets = js.Array(
         new ChartDataSets {
           label = "time (s)"

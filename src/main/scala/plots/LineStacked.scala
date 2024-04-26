@@ -24,6 +24,11 @@ trait LineStacked extends Generic {
       scales = new ChartScales {
         xAxes = js.Array(
           new ChartXAxe {
+            `type` = "time"
+            distribution = typings.chartJs.chartJsStrings.series
+            time = new TimeScale {
+              unit = TimeUnit.hour
+            }
             stacked = true
             scaleLabel = new ScaleTitleOptions {
               display = true
