@@ -1,8 +1,11 @@
-## sbt project compiled with Scala 3
+# Effekt Plots
 
-### Usage
+Runs benchmarks of the [Effekt programming language](https://effekt-lang.org) and visualizes various metrics with plots.
 
-This is a normal sbt project. You can compile code with `sbt compile`, run it with `sbt run`, and `sbt console` will start a Scala 3 REPL.
+## Usage
 
-For more information on the sbt-dotty plugin, see the
-[scala3-example-project](https://github.com/scala/scala3-example-project/blob/main/README.md).
+0. Clone repository recursively and (if needed) sync `effekt/` to newest commit
+1. Install `sbt`
+3. Generate data (also installs Effekt): `cd generate; ./main.sh; cd ..`
+3. Compile ScalaJS to JavaScript: `sbt fastOptJS::webpack`
+4. Open `index.html` in a browser
