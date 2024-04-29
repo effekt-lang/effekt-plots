@@ -28,6 +28,9 @@ trait LineStacked extends Generic {
             distribution = typings.chartJs.chartJsStrings.series
             time = new TimeScale {
               unit = TimeUnit.hour
+              displayFormats = new TimeDisplayFormat {
+                hour = "hA, D.M."
+              }
             }
             stacked = true
             scaleLabel = new ScaleTitleOptions {

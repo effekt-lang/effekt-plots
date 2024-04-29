@@ -27,11 +27,9 @@ trait Line extends Generic {
             `type` = "time"
             distribution = typings.chartJs.chartJsStrings.series
             time = new TimeScale {
-              //unit = TimeUnit.hour
-              unit = TimeUnit.day
+              unit = TimeUnit.hour
               displayFormats = new TimeDisplayFormat {
-                hour = "MM YYYY"
-                day = "MM YYYY"
+                hour = "hA, D.M."
               }
             }
             scaleLabel = new ScaleTitleOptions {

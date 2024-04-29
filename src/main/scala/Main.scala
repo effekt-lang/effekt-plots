@@ -15,13 +15,12 @@ def loadFile(name: String): js.Array[js.Dynamic] =
 
 case class Data(phases: js.Array[js.Dynamic], codeSize: js.Array[js.Dynamic], metrics: js.Array[js.Dynamic], buildTime: js.Array[js.Dynamic])
 
-val allData: Data =
-  Data(
-    loadFile("phases"),
-    loadFile("cloc"),
-    loadFile("metrics"),
-    loadFile("build")
-  )
+val allData = Data(
+  loadFile("phases"),
+  loadFile("cloc"),
+  loadFile("metrics"),
+  loadFile("build")
+)
 
 def renderPlots(timeFilter: TimeFilter): HtmlElement = {
   val preprocessor = new Preprocessor(timeFilter)
@@ -56,7 +55,7 @@ val view = {
         value := {
           val today = new js.Date()
           today.setHours(-24 * 7) // last week
-          new js.Date(today.toISOString()).toISOString().split('T')(0)
+          today.toISOString().split('T')(0)
         }
       ),
       "to",
