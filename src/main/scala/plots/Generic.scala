@@ -2,11 +2,13 @@ package plots
 
 import typings.chartJs.mod.*
 import com.raquo.laminar.api.L.{*, given}
-
+import utils.Color
 import org.scalajs.dom
 
 trait Generic {
   val chartConfig: ChartConfiguration
+
+  val colorScheme = Color()
 
   def draw(): HtmlElement = {
     var optChart: Option[Chart] = None

@@ -3,7 +3,7 @@ package data
 import plots.Line
 import scala.scalajs.js
 import typings.chartJs.mod.*
-import utils.randomColor
+import utils.Color
 
 class MemoryUsage(d: js.Array[js.Dynamic]) extends Line {
   override lazy val chartTitle: String = "Memory Usage of Benchmarks"
@@ -17,7 +17,9 @@ class MemoryUsage(d: js.Array[js.Dynamic]) extends Line {
         new ChartDataSets {
           label = "memory usage (kB)"
           data = d.map { s => s.maxMem.asInstanceOf[String].toInt }
-          backgroundColor = randomColor()
+          fill = false
+          backgroundColor = colorScheme.nextColor()
+          borderColor = backgroundColor
         }
       )
     }

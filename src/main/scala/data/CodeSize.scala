@@ -3,7 +3,7 @@ package data
 import plots.LineStacked
 import scala.scalajs.js
 import typings.chartJs.mod.*
-import utils.randomColor
+import utils.Color
 
 class CodeSize(d: js.Array[js.Dynamic]) extends LineStacked {
   override lazy val chartTitle: String = "Code Size of Entire Repository"
@@ -20,7 +20,7 @@ class CodeSize(d: js.Array[js.Dynamic]) extends LineStacked {
         new ChartDataSets {
           label = key
           data = d.map { _.selectDynamic(key).code.asInstanceOf[Double] }
-          backgroundColor = randomColor()
+          backgroundColor = colorScheme.nextColor()
         }
       }
     }

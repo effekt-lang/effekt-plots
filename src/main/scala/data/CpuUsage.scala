@@ -3,7 +3,7 @@ package data
 import plots.Line
 import scala.scalajs.js
 import typings.chartJs.mod.*
-import utils.randomColor
+import utils.Color
 
 class CpuUsage(d: js.Array[js.Dynamic]) extends Line {
   override lazy val chartTitle: String = "CPU Usage of Benchmarks"
@@ -17,7 +17,9 @@ class CpuUsage(d: js.Array[js.Dynamic]) extends Line {
         new ChartDataSets {
           label = "CPU usage (%)"
           data = d.map { s => s.cpuUsage.asInstanceOf[String].init.toInt }
-          backgroundColor = randomColor()
+          fill = false
+          backgroundColor = colorScheme.nextColor()
+          borderColor = backgroundColor
         }
       )
     }

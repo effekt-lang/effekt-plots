@@ -3,7 +3,7 @@ package data
 import plots.LineStacked
 import scala.scalajs.js
 import typings.chartJs.mod.*
-import utils.randomColor
+import utils.Color
 
 class PhaseTimes(d: js.Array[js.Dynamic]) extends LineStacked {
   override lazy val chartTitle: String = "Phase Times of Benchmarks"
@@ -13,6 +13,7 @@ class PhaseTimes(d: js.Array[js.Dynamic]) extends LineStacked {
   lazy val chartData = {
     val keys = js.Object.keys(d(0).asInstanceOf[js.Object])
       .filter { k => k != "meta" && k != "total" }
+    val colorScheme = Color()
 
     new ChartData {
       labels = d.map { e => new js.Date(e.meta.currentDate.asInstanceOf[String].toDouble * 1000) }
@@ -24,7 +25,7 @@ class PhaseTimes(d: js.Array[js.Dynamic]) extends LineStacked {
                 case (acc, js.Tuple2(_, s)) => acc + s.asInstanceOf[Double]
             }
           }
-          backgroundColor = randomColor()
+          backgroundColor = colorScheme.nextColor()
         }
       }
     }

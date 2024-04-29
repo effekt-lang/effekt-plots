@@ -3,7 +3,7 @@ package data
 import plots.Line
 import scala.scalajs.js
 import typings.chartJs.mod.*
-import utils.randomColor
+import utils.Color
 
 class BuildTime(d: js.Array[js.Dynamic]) extends Line {
   override lazy val chartTitle: String = "Time for Building Effekt"
@@ -17,7 +17,9 @@ class BuildTime(d: js.Array[js.Dynamic]) extends Line {
         new ChartDataSets {
           label = "time (s)"
           data = d.map { s => s.buildTime.asInstanceOf[String].toDouble }
-          backgroundColor = randomColor()
+          fill = false
+          backgroundColor = colorScheme.nextColor()
+          borderColor = backgroundColor
         }
       )
     }
