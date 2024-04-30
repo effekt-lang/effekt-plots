@@ -30,13 +30,32 @@ div#control * {
 
 div#main {
     width: 100%;
-    height: 100%;
+    position: relative;
 }
 
 div#main section {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+}
+
+/* mobile */
+@media(max-width: 1300px) {
+    div#main section canvas {
+        width: 100% !important;
+        max-height: 60vh !important;
+    }
+
+    .header span {
+        font-size: 1.5em;
+    }
+
+    div#control {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
 }
 
 /* not phone / tablet */

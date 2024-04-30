@@ -17,6 +17,7 @@ trait LineStacked extends Generic {
     data = chartData
     options = new ChartOptions {
       responsive = true
+      maintainAspectRatio = false
       title = new ChartTitleOptions {
         display = true
         text = chartTitle
