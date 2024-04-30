@@ -5,7 +5,7 @@ on:
     branches:
       - main
   workflow_run:
-    workflows: ["Deploy to pages"]
+    workflows: ["Sync benchmarks"]
     branches: [main]
     types:
       - completed
