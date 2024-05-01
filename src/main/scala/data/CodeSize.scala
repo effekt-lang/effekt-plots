@@ -19,7 +19,11 @@ class CodeSize(d: js.Array[js.Dynamic]) extends LineStacked {
       datasets = keys.map { key =>
         new ChartDataSets {
           label = key
-          data = d.map { _.selectDynamic(key).code.asInstanceOf[Double] }
+          data = d.map { e =>
+            val value = e.selectDynamic(key)
+            if (value == js.undefined) 0
+            else value.code.asInstanceOf[Double]
+          }
           backgroundColor = colorScheme.nextColor()
         }
       }
