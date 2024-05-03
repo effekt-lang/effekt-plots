@@ -4,6 +4,7 @@ import typings.chartJs.mod.*
 import com.raquo.laminar.api.L.{*, given}
 
 import scala.scalajs.js
+import org.scalajs.dom
 
 trait Line extends Generic {
   lazy val chartData: ChartData
@@ -11,6 +12,8 @@ trait Line extends Generic {
   lazy val chartTitle = "Line Chart"
   lazy val xLabel = "x axis"
   lazy val yLabel = "y axis"
+
+  def tooltipBody(idx: Int) = js.Array("")
 
   val chartConfig = new ChartConfiguration {
     `type` = ChartType.line
@@ -21,6 +24,13 @@ trait Line extends Generic {
       title = new ChartTitleOptions {
         display = true
         text = chartTitle
+      }
+      tooltips = new ChartTooltipOptions {
+        callbacks = new ChartTooltipCallback {
+          afterBody = (items: js.Array[ChartTooltipItem], data: ChartData) =>
+            items(0).index.map { idx => tooltipBody(idx.toInt) }
+              .getOrElse(js.Array(""))
+        }
       }
       scales = new ChartScales {
         xAxes = js.Array(

@@ -12,6 +12,8 @@ trait LineStacked extends Generic {
   lazy val xLabel = "x axis"
   lazy val yLabel = "y axis"
 
+  def tooltipBody(idx: Int) = js.Array("")
+
   val chartConfig = new ChartConfiguration {
     `type` = ChartType.line
     data = chartData
@@ -21,6 +23,13 @@ trait LineStacked extends Generic {
       title = new ChartTitleOptions {
         display = true
         text = chartTitle
+      }
+      tooltips = new ChartTooltipOptions {
+        callbacks = new ChartTooltipCallback {
+          afterBody = (items: js.Array[ChartTooltipItem], data: ChartData) =>
+            items(0).index.map { idx => tooltipBody(idx.toInt) }
+              .getOrElse(js.Array(""))
+        }
       }
       scales = new ChartScales {
         xAxes = js.Array(

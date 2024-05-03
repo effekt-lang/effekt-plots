@@ -10,6 +10,11 @@ class CpuUsage(d: js.Array[js.Dynamic]) extends Line {
   override lazy val xLabel = "benchmark date"
   override lazy val yLabel = "CPU usage in percent"
 
+  override def tooltipBody(idx: Int) = js.Array(
+    f"Commit: ${d(idx).meta.commit}",
+    f"Commit date: ${new js.Date(d(idx).meta.commitDate.asInstanceOf[String].toDouble * 1000).toLocaleString()}"
+  )
+
   lazy val chartData = {
     new ChartData {
       labels = d.map { e => new js.Date(e.meta.currentDate.asInstanceOf[String].toDouble * 1000) }

@@ -10,6 +10,11 @@ class CodeSize(d: js.Array[js.Dynamic]) extends LineStacked {
   override lazy val xLabel = "benchmark date"
   override lazy val yLabel = "lines of code"
 
+  override def tooltipBody(idx: Int) = js.Array(
+    f"Commit: ${d(idx).meta.commit}",
+    f"Commit date: ${new js.Date(d(idx).meta.commitDate.asInstanceOf[String].toDouble * 1000).toLocaleString()}"
+  )
+
   lazy val chartData = {
     val keys = js.Object.keys(d(0).asInstanceOf[js.Object])
       .filter { k => k != "meta" && k != "SUM" }
