@@ -35,6 +35,7 @@ def renderPlots(timeFilter: TimeFilter): HtmlElement = {
 
   sectionTag(
     PhaseTimes(phasesData).draw(),
+    ByBenchmark(phasesData).draw(),
     CodeSize(codeSizeData).draw(),
     BuildTime(buildTimeData).draw(),
     MemoryUsage(metricsData).draw(),
