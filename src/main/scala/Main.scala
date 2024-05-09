@@ -15,12 +15,44 @@ def loadFile(name: String): js.Array[js.Dynamic] =
 
 case class Data(phases: js.Array[js.Dynamic], codeSize: js.Array[js.Dynamic], metrics: js.Array[js.Dynamic], buildTime: js.Array[js.Dynamic])
 
+// TODO: figure this out automatically
+val trackedDirectories = js.Array(
+  "examples/benchmarks/",
+  "examples/casestudies/",
+  "/home/runner/work/effekt-plots/effekt-plots/effekt/libraries/",
+)
+
 val allData = Data(
   loadFile("phases"),
   loadFile("cloc"),
   loadFile("metrics"),
   loadFile("build")
 )
+
+def renderBenchmarkSection(prefix: String, phasesData: js.Array[js.Dynamic]): HtmlElement = {
+  val filtered = phasesData.map { dyn =>
+    js.Object.fromEntries(
+      js.Object.keys(dyn.asInstanceOf[js.Object]).map { (phase: String) =>
+        js.Tuple2(
+          phase,
+          js.Object.fromEntries(
+            js.Object.entries(dyn.selectDynamic(phase).asInstanceOf[js.Object]).filter { case js.Tuple2(key, value) =>
+              key.startsWith(prefix) || key.startsWith("./" + prefix) || phase == "meta"
+            }.map { case js.Tuple2(key, value) =>
+              js.Tuple2(key.replace("./" + prefix, "").replace(prefix, ""), value)
+            }
+          )
+        )
+      }
+    ).asInstanceOf[js.Dynamic]
+  }
+
+  sectionTag(
+    h2(prefix, flexBasis.percent(100)),
+    PhaseTimes(filtered).draw(),
+    ByBenchmark(filtered).draw(),
+  )
+}
 
 def renderPlots(timeFilter: TimeFilter): HtmlElement = {
   val preprocessor = new Preprocessor(timeFilter)
@@ -34,13 +66,14 @@ def renderPlots(timeFilter: TimeFilter): HtmlElement = {
   if (phasesData.isEmpty) return sectionTag()
 
   sectionTag(
-    PhaseTimes(phasesData).draw(),
-    ByBenchmark(phasesData).draw(),
-    CodeSize(codeSizeData).draw(),
-    BuildTime(buildTimeData).draw(),
+    trackedDirectories.map { (dir: String) => renderBenchmarkSection(dir, phasesData) },
+    h2("Accumulated benchmark metrics", flexBasis.percent(100)),
     MemoryUsage(metricsData).draw(),
     TimeMeasure(metricsData).draw(),
-    CpuUsage(metricsData).draw()
+    CpuUsage(metricsData).draw(),
+    h2("General metrics", flexBasis.percent(100)),
+    CodeSize(codeSizeData).draw(),
+    BuildTime(buildTimeData).draw(),
   )
 }
 
