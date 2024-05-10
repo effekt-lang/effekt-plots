@@ -13,7 +13,12 @@ def loadFile(name: String): js.Array[js.Dynamic] =
   xhr.send(null)
   js.JSON.parse(xhr.responseText).asInstanceOf[js.Array[js.Dynamic]]
 
-case class Data(phases: js.Array[js.Dynamic], codeSize: js.Array[js.Dynamic], metrics: js.Array[js.Dynamic], buildTime: js.Array[js.Dynamic])
+case class Data(
+  phases: js.Array[js.Dynamic],
+  codeSize: js.Array[js.Dynamic],
+  metrics: js.Array[js.Dynamic],
+  buildTime: js.Array[js.Dynamic],
+)
 
 // TODO: figure this out automatically
 val trackedDirectories = js.Array(
@@ -26,7 +31,7 @@ val allData = Data(
   loadFile("phases"),
   loadFile("cloc"),
   loadFile("metrics"),
-  loadFile("build")
+  loadFile("build"),
 )
 
 def renderBenchmarkSection(prefix: String, phasesData: js.Array[js.Dynamic]): HtmlElement = {
@@ -48,29 +53,52 @@ def renderBenchmarkSection(prefix: String, phasesData: js.Array[js.Dynamic]): Ht
   }
 
   sectionTag(
-    h2(prefix, flexBasis.percent(100)),
+    h3(prefix, flexBasis.percent(100)),
     PhaseTimes(filtered).draw(),
     ByBenchmark(filtered).draw(),
+  )
+}
+
+def renderMetricsSection(prefix: String, metricsData: js.Array[js.Dynamic]): HtmlElement = {
+  val filtered = metricsData.map { dyn =>
+    js.Object.fromEntries(
+      js.Object.entries(dyn.asInstanceOf[js.Object]).filter { case js.Tuple2(key, value) =>
+        key.startsWith(prefix) || key.startsWith("./" + prefix) || key == "meta"
+      }.map { case js.Tuple2(key, value) =>
+        js.Tuple2(key.replace("./" + prefix, "").replace(prefix, ""), value)
+      }
+    ).asInstanceOf[js.Dynamic]
+  }
+
+  sectionTag(
+    h3(prefix, flexBasis.percent(100)),
+    MemoryUsage(filtered).draw(),
+    TimeMeasure(filtered).draw(),
+    CpuUsage(filtered).draw(),
   )
 }
 
 def renderPlots(timeFilter: TimeFilter): HtmlElement = {
   val preprocessor = new Preprocessor(timeFilter)
 
+  // we split benchmarks measured by `effekt --time json` into build-only (`-b`) and including execution (acc)
+
   val phasesData = preprocessor.filter(allData.phases)
   val codeSizeData = preprocessor.filter(allData.codeSize)
-  val metricsData = preprocessor.filter(allData.metrics)
   val buildTimeData = preprocessor.filter(allData.buildTime)
+  val metricsData = preprocessor.filter(allData.metrics)
 
   // too much filtering, nothing left
   if (phasesData.isEmpty) return sectionTag()
 
   sectionTag(
+    h2("Benchmark phase times (including execution: `effekt <files>`)", flexBasis.percent(100)),
     trackedDirectories.map { (dir: String) => renderBenchmarkSection(dir, phasesData) },
-    h2("Accumulated benchmark metrics", flexBasis.percent(100)),
-    MemoryUsage(metricsData).draw(),
-    TimeMeasure(metricsData).draw(),
-    CpuUsage(metricsData).draw(),
+    h2("Individual benchmark metrics (`effekt -b <file>`)", flexBasis.percent(100)),
+    trackedDirectories.map { (dir: String) => renderMetricsSection(dir, metricsData) },
+    // MemoryUsage(metricsData).draw(),
+    // TimeMeasure(metricsData).draw(),
+    // CpuUsage(metricsData).draw(),
     h2("General metrics", flexBasis.percent(100)),
     CodeSize(codeSizeData).draw(),
     BuildTime(buildTimeData).draw(),

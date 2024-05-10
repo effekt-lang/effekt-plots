@@ -18,7 +18,6 @@ class PhaseTimes(d: js.Array[js.Dynamic]) extends LineStacked {
   lazy val chartData = {
     val keys = js.Object.keys(d(0).asInstanceOf[js.Object])
       .filter { k => k != "meta" && k != "total" }
-    val colorScheme = Color()
 
     new ChartData {
       labels = d.map { e => new js.Date(e.meta.currentDate.asInstanceOf[String].toDouble * 1000) }
