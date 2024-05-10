@@ -6,12 +6,16 @@ import org.scalajs.dom.XMLHttpRequest
 import scalajs.js
 import org.scalajs.dom.HTMLInputElement
 
-// TODO: this should be async
-def loadFile(name: String): js.Array[js.Dynamic] = 
-  val xhr = XMLHttpRequest()
-  xhr.open("get", s"data/$name.json", false)
-  xhr.send(null)
-  js.JSON.parse(xhr.responseText).asInstanceOf[js.Array[js.Dynamic]]
+// TODO: figure this out automatically
+val trackedDirectories = js.Array(
+  "examples/benchmarks/",
+  "examples/casestudies/",
+  "/home/runner/work/effekt-plots/effekt-plots/effekt/libraries/",
+)
+
+val trackedIndividualBuild = js.Array(
+  "examples/casestudies/prettyprinter.effekt.md"
+)
 
 case class Data(
   phases: js.Array[js.Dynamic],
@@ -20,19 +24,19 @@ case class Data(
   buildTime: js.Array[js.Dynamic],
 )
 
-// TODO: figure this out automatically
-val trackedDirectories = js.Array(
-  "examples/benchmarks/",
-  "examples/casestudies/",
-  "/home/runner/work/effekt-plots/effekt-plots/effekt/libraries/",
-)
-
 val allData = Data(
   loadFile("phases"),
   loadFile("cloc"),
   loadFile("metrics"),
   loadFile("build"),
 )
+
+// TODO: this should be async
+def loadFile(name: String): js.Array[js.Dynamic] = 
+  val xhr = XMLHttpRequest()
+  xhr.open("get", s"data/$name.json", false)
+  xhr.send(null)
+  js.JSON.parse(xhr.responseText).asInstanceOf[js.Array[js.Dynamic]]
 
 def renderBenchmarkSection(prefix: String, phasesData: js.Array[js.Dynamic]): HtmlElement = {
   val filtered = phasesData.map { dyn =>
@@ -59,19 +63,18 @@ def renderBenchmarkSection(prefix: String, phasesData: js.Array[js.Dynamic]): Ht
   )
 }
 
-def renderMetricsSection(prefix: String, metricsData: js.Array[js.Dynamic]): HtmlElement = {
+def renderMetricsSection(metricsData: js.Array[js.Dynamic]): HtmlElement = {
+  val files = trackedIndividualBuild
+
   val filtered = metricsData.map { dyn =>
     js.Object.fromEntries(
       js.Object.entries(dyn.asInstanceOf[js.Object]).filter { case js.Tuple2(key, value) =>
-        key.startsWith(prefix) || key.startsWith("./" + prefix) || key == "meta"
-      }.map { case js.Tuple2(key, value) =>
-        js.Tuple2(key.replace("./" + prefix, "").replace(prefix, ""), value)
+        files.contains(key) || files.contains("./" + key) || key == "meta"
       }
     ).asInstanceOf[js.Dynamic]
   }
 
   sectionTag(
-    h3(prefix, flexBasis.percent(100)),
     MemoryUsage(filtered).draw(),
     TimeMeasure(filtered).draw(),
     CpuUsage(filtered).draw(),
@@ -94,11 +97,8 @@ def renderPlots(timeFilter: TimeFilter): HtmlElement = {
   sectionTag(
     h2("Benchmark phase times (including execution: `effekt <files>`)", flexBasis.percent(100)),
     trackedDirectories.map { (dir: String) => renderBenchmarkSection(dir, phasesData) },
-    h2("Individual benchmark metrics (`effekt -b <file>`)", flexBasis.percent(100)),
-    trackedDirectories.map { (dir: String) => renderMetricsSection(dir, metricsData) },
-    // MemoryUsage(metricsData).draw(),
-    // TimeMeasure(metricsData).draw(),
-    // CpuUsage(metricsData).draw(),
+    h2("Build metrics of selected benchmarks (`effekt -b`)", flexBasis.percent(100)),
+    renderMetricsSection(metricsData),
     h2("General metrics", flexBasis.percent(100)),
     CodeSize(codeSizeData).draw(),
     BuildTime(buildTimeData).draw(),

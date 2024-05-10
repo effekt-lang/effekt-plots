@@ -19,18 +19,6 @@ class CpuUsage(d: js.Array[js.Dynamic]) extends LineStacked {
     val keys = js.Object.keys(d(0).asInstanceOf[js.Object])
       .filter { k => k != "meta" && k != "total" }
 
-    // new ChartData {
-    //   labels = d.map { e => new js.Date(e.meta.currentDate.asInstanceOf[String].toDouble * 1000) }
-    //   datasets = js.Array(
-    //     new ChartDataSets {
-    //       label = "CPU usage (%)"
-    //       data = d.map { s => s.cpuUsage.asInstanceOf[String].init.toInt }
-    //       fill = false
-    //       backgroundColor = colorScheme.nextColor()
-    //       borderColor = backgroundColor
-    //     }
-    //   )
-    // }
     new ChartData {
       labels = d.map { e => new js.Date(e.meta.currentDate.asInstanceOf[String].toDouble * 1000) }
       datasets = keys.map { key =>
@@ -38,6 +26,8 @@ class CpuUsage(d: js.Array[js.Dynamic]) extends LineStacked {
           label = key
           data = d.map { _.selectDynamic(key).cpuUsage.asInstanceOf[String].init.toInt }
           backgroundColor = colorScheme.nextColor()
+          borderColor = backgroundColor
+          fill = false
         }
       }
     }

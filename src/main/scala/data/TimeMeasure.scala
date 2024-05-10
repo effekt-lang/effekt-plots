@@ -26,6 +26,8 @@ class TimeMeasure(d: js.Array[js.Dynamic]) extends LineStacked {
           label = key
           data = d.map { _.selectDynamic(key).userTime.asInstanceOf[String].toDouble }
           backgroundColor = colorScheme.nextColor()
+          borderColor = backgroundColor
+          fill = false
         }
       }
     }

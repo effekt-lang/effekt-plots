@@ -26,6 +26,8 @@ class MemoryUsage(d: js.Array[js.Dynamic]) extends LineStacked {
           label = key
           data = d.map { _.selectDynamic(key).maxMem.asInstanceOf[String].toInt }
           backgroundColor = colorScheme.nextColor()
+          borderColor = backgroundColor
+          fill = false
         }
       }
     }
