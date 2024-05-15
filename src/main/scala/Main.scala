@@ -84,8 +84,6 @@ def renderMetricsSection(metricsData: js.Array[js.Dynamic]): HtmlElement = {
 def renderPlots(timeFilter: TimeFilter): HtmlElement = {
   val preprocessor = new Preprocessor(timeFilter)
 
-  // we split benchmarks measured by `effekt --time json` into build-only (`-b`) and including execution (acc)
-
   val phasesData = preprocessor.filter(allData.phases)
   val codeSizeData = preprocessor.filter(allData.codeSize)
   val buildTimeData = preprocessor.filter(allData.buildTime)
@@ -95,9 +93,11 @@ def renderPlots(timeFilter: TimeFilter): HtmlElement = {
   if (phasesData.isEmpty) return sectionTag()
 
   sectionTag(
-    h2("Benchmark phase times (including execution: `effekt <files>`)", flexBasis.percent(100)),
+    h2("Benchmark phase times", flexBasis.percent(100)),
+    p("The time per phase are extracted using the Effekt `--time json` flag.", flexBasis.percent(100)),
     trackedDirectories.map { (dir: String) => renderBenchmarkSection(dir, phasesData) },
-    h2("Build metrics of selected benchmarks (`effekt -b`)", flexBasis.percent(100)),
+    h2("Build metrics", flexBasis.percent(100)),
+    p("The metrics are gathered by measuring `effekt -b <file>` using `gnutime`. Therefore, these metrics include the overhead of JVM.", flexBasis.percent(100)),
     renderMetricsSection(metricsData),
     h2("General metrics", flexBasis.percent(100)),
     CodeSize(codeSizeData).draw(),
