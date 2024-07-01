@@ -6,7 +6,8 @@ set -e
 ./benchmarks.sh
 ./cloc.sh | ./append.sh cloc.json
 ./phases.sh | ./append.sh phases.json
-./metrics.sh time.out | ./append.sh metrics.json
+./metrics.sh | ./append.sh metrics.json
+./backends.sh | ./append.sh backends.json
 
 # reset effekt repository
 git -C ../effekt/ checkout .
