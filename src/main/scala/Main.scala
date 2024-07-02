@@ -22,6 +22,7 @@ case class Data(
   codeSize: js.Array[js.Dynamic],
   metrics: js.Array[js.Dynamic],
   buildTime: js.Array[js.Dynamic],
+  backends: js.Array[js.Dynamic],
 )
 
 val allData = Data(
@@ -29,6 +30,7 @@ val allData = Data(
   loadFile("cloc"),
   loadFile("metrics"),
   loadFile("build"),
+  loadFile("backends"),
 )
 
 // TODO: this should be async
@@ -39,6 +41,7 @@ def loadFile(name: String): js.Array[js.Dynamic] =
   js.JSON.parse(xhr.responseText).asInstanceOf[js.Array[js.Dynamic]]
 
 def renderBenchmarkSection(prefix: String, phasesData: js.Array[js.Dynamic]): HtmlElement = {
+  // filter the files in the data by prefix
   val filtered = phasesData.map { dyn =>
     js.Object.fromEntries(
       js.Object.keys(dyn.asInstanceOf[js.Object]).map { (phase: String) =>
@@ -88,17 +91,21 @@ def renderPlots(timeFilter: TimeFilter): HtmlElement = {
   val codeSizeData = preprocessor.filter(allData.codeSize)
   val buildTimeData = preprocessor.filter(allData.buildTime)
   val metricsData = preprocessor.filter(allData.metrics)
+  val backendsData = preprocessor.filter(allData.backends)
 
   // too much filtering, nothing left
   if (phasesData.isEmpty) return sectionTag()
 
   sectionTag(
-    h2("Benchmark phase times", flexBasis.percent(100)),
-    p("The time per phase are extracted using the Effekt `--time json` flag.", flexBasis.percent(100)),
+    h2("Phase times", flexBasis.percent(100)),
+    p("The time per phase is extracted using the Effekt `--time json` flag.", flexBasis.percent(100)),
     trackedDirectories.map { (dir: String) => renderBenchmarkSection(dir, phasesData) },
     h2("Build metrics", flexBasis.percent(100)),
     p("The metrics are gathered by measuring `effekt -b <file>` using `gnutime`. Therefore, these metrics include the overhead of JVM.", flexBasis.percent(100)),
     renderMetricsSection(metricsData),
+    h2("Backend benchmarks", flexBasis.percent(100)),
+    Backends(backendsData, "llvm").draw(),
+    Backends(backendsData, "js").draw(),
     h2("General metrics", flexBasis.percent(100)),
     CodeSize(codeSizeData).draw(),
     BuildTime(buildTimeData).draw(),
@@ -116,7 +123,7 @@ val view = {
         `type` := "date",
         value := {
           val today = new js.Date()
-          today.setHours(-24 * 7) // last week
+          today.setHours(-24 * 7 * 4) // last month
           today.toISOString().split('T')(0)
         }
       ),
