@@ -12,17 +12,22 @@ trait Generic {
 
   def draw(): HtmlElement = {
     var optChart: Option[Chart] = None
-    canvasTag(
-      onMountUnmountCallback(
-        mount = { nodeCtx => 
-          val ctx = nodeCtx.thisNode.ref
-          val chart = Chart.apply.newInstance2(ctx, chartConfig)
-          optChart = Some(chart)
-        },
-        unmount = { thisNode => 
-          optChart.map { _.destroy() }
-          optChart = None
-        }
+    val legend = div(className := "legend")
+    div(
+      legend,
+      canvasTag(
+        onMountUnmountCallback(
+          mount = { nodeCtx => 
+            val ctx = nodeCtx.thisNode.ref
+            val chart = Chart.apply.newInstance2(ctx, chartConfig)
+            legend.ref.innerHTML = chart.generateLegend().toString()
+            optChart = Some(chart)
+          },
+          unmount = { thisNode => 
+            optChart.map { _.destroy() }
+            optChart = None
+          }
+        )
       )
     )
   }
