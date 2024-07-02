@@ -8,7 +8,7 @@ import org.scalajs.dom.HTMLInputElement
 
 // TODO: figure this out automatically
 val trackedDirectories = js.Array(
-  "examples/benchmarks/",
+  "examples/benchmarks/other/",
   "examples/casestudies/",
   "/home/runner/work/effekt-plots/effekt-plots/effekt/libraries/",
 )
@@ -62,7 +62,12 @@ def renderBenchmarkSection(prefix: String, phasesData: js.Array[js.Dynamic]): Ht
   sectionTag(
     h3(prefix, flexBasis.percent(100)),
     PhaseTimes(filtered).draw(),
-    ByBenchmark(filtered).draw(),
+
+    // the standard library doesn't have elements here, so we don't draw total if empty
+    if (js.Object.keys(filtered(0).total.asInstanceOf[js.Object]).length > 0)
+      ByBenchmark(filtered).draw()
+    else
+      div(),
   )
 }
 
