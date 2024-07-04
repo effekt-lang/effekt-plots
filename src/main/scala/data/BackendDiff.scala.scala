@@ -7,8 +7,8 @@ import utils.Color
 
 import org.scalajs.dom
 
-class Backends(d: js.Array[js.Dynamic], backend: String) extends LineStacked {
-  override lazy val chartTitle: String = s"Execution time for backend $backend"
+class BackendDiff(d: js.Array[js.Dynamic], backend1: String, backend2: String) extends LineStacked {
+  override lazy val chartTitle: String = s"Difference between execution time of backends ($backend1-$backend2)"
   override lazy val xLabel = "benchmark date"
   override lazy val yLabel = "time in seconds"
 
@@ -18,7 +18,7 @@ class Backends(d: js.Array[js.Dynamic], backend: String) extends LineStacked {
   )
 
   lazy val chartData = {
-    val keys = js.Object.keys(d(0).selectDynamic(backend).asInstanceOf[js.Object])
+    val keys = js.Object.keys(d(0).selectDynamic(backend1).asInstanceOf[js.Object])
       .filter { k => k != "meta" && k != "total" }
 
     new ChartData {
@@ -26,7 +26,10 @@ class Backends(d: js.Array[js.Dynamic], backend: String) extends LineStacked {
       datasets = keys.map { key =>
         new ChartDataSets {
           label = key
-          data = d.map { _.selectDynamic(backend).selectDynamic(key).time.asInstanceOf[Double] / 1e9 }
+          data = d.map { e =>
+            (e.selectDynamic(backend1).selectDynamic(key).time.asInstanceOf[Double] -
+            e.selectDynamic(backend2).selectDynamic(key).time.asInstanceOf[Double]) / 1e9
+          }
           backgroundColor = colorScheme.nextColor()
         }
       }
