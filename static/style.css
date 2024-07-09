@@ -66,4 +66,32 @@ div#main section {
         border: 1px solid #dadada;
         margin: 16px;
     }
+
+    .legend ul {
+        max-width: 40vw;
+    }
+}
+
+/* custom chart JS legend */
+
+.legend ul {
+    display: flex;
+    list-style: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-height: 6em;
+    overflow-y: auto;
+}
+
+.legend li {
+    display: flex;
+    align-items: center;
+}
+
+.legend li span {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin: 0 5px;
 }

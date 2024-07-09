@@ -19,6 +19,10 @@ combineMetrics() {
 
 {
 	for file in $(find ../effekt/ -name "*.time.out"); do
+		exitStatus=$(grep "Exit status" "$file" | awk '{print $3}')
+		if [ "$exitStatus" -ne 0 ]; then
+			continue
+		fi
 		_file="${file//"../effekt/"/}"
 		_file="${_file//".time.out"/}"
 		echo "{\"$_file\":"

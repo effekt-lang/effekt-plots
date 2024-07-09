@@ -31,6 +31,9 @@ trait LineStacked extends Generic {
               .getOrElse(js.Array(""))
         }
       }
+      legend = new ChartLegendOptions {
+        display = false
+      }
       scales = new ChartScales {
         xAxes = js.Array(
           new ChartXAxe {

@@ -5,8 +5,10 @@ import scala.scalajs.js
 import typings.chartJs.mod.*
 import utils.Color
 
-class ByBenchmark(d: js.Array[js.Dynamic]) extends LineStacked {
-  override lazy val chartTitle: String = "Accumulated Phase Times per Benchmark"
+import org.scalajs.dom
+
+class BackendDiff(d: js.Array[js.Dynamic], backend1: String, backend2: String) extends LineStacked {
+  override lazy val chartTitle: String = s"Difference between execution time of backends ($backend1-$backend2)"
   override lazy val xLabel = "benchmark date"
   override lazy val yLabel = "time in seconds"
 
@@ -16,15 +18,18 @@ class ByBenchmark(d: js.Array[js.Dynamic]) extends LineStacked {
   )
 
   lazy val chartData = {
-    val keys = js.Object.keys(d(0).total.asInstanceOf[js.Object])
-    val colorScheme = Color()
+    val keys = js.Object.keys(d(0).selectDynamic(backend1).asInstanceOf[js.Object])
+      .filter { k => k != "meta" && k != "total" }
 
     new ChartData {
       labels = d.map { e => new js.Date(e.meta.currentDate.asInstanceOf[String].toDouble * 1000) }
       datasets = keys.map { key =>
         new ChartDataSets {
           label = key
-          data = d.map { p => p.total.selectDynamic(key).asInstanceOf[Double] }
+          data = d.map { e =>
+            (e.selectDynamic(backend1).selectDynamic(key).time.asInstanceOf[Double] -
+            e.selectDynamic(backend2).selectDynamic(key).time.asInstanceOf[Double]) / 1e9
+          }
           backgroundColor = colorScheme.nextColor()
         }
       }
