@@ -4,7 +4,7 @@ set -e
 # we need to cd here since some examples import local files
 cd ../effekt/
 
-FILES="examples/benchmarks/*.effekt examples/casestudies/*.effekt.md"
+FILES="examples/casestudies/*.effekt.md"
 
 # measure build performance first
 for file in $FILES; do

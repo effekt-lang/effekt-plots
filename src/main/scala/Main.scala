@@ -8,7 +8,6 @@ import org.scalajs.dom.HTMLInputElement
 
 // TODO: figure this out automatically
 val trackedDirectories = js.Array(
-  "examples/benchmarks/other/",
   "examples/casestudies/",
   "/home/runner/work/effekt-plots/effekt-plots/effekt/libraries/",
 )
