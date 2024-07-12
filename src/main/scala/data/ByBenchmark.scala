@@ -24,7 +24,7 @@ class ByBenchmark(d: js.Array[js.Dynamic]) extends LineStacked {
       datasets = keys.map { key =>
         new ChartDataSets {
           label = key
-          data = d.map { p => p.total.selectDynamic(key).asInstanceOf[Double] }
+          data = d.map { p => p.total.selectDynamic(key).asInstanceOf[Double] / 1000 }
           backgroundColor = colorScheme.nextColor()
         }
       }

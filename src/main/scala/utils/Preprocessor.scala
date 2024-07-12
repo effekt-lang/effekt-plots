@@ -6,11 +6,11 @@ trait Preprocessor {
   def filter(data: js.Array[js.Dynamic]): js.Array[js.Dynamic]
 }
 
-class TimePreprocessor(preprocessor: js.Date => Boolean) extends Preprocessor {
+class TimePreprocessor(matches: js.Date => Boolean) extends Preprocessor {
   def filter(data: js.Array[js.Dynamic]) =
     data.filter { e =>
       val date = new js.Date(e.meta.currentDate.asInstanceOf[String].toDouble * 1000)
-      preprocessor(date)
+      matches(date)
     }
 }
 class SubstitutionPreprocessor(matches: String => Boolean, substitute: String => String) extends Preprocessor {

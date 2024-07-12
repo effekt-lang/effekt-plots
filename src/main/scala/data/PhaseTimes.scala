@@ -26,7 +26,7 @@ class PhaseTimes(d: js.Array[js.Dynamic]) extends LineStacked {
           label = key
           data = d.map { p =>
             js.Object.entries(p.selectDynamic(key).asInstanceOf[js.Object]).foldLeft(0.0) {
-                case (acc, js.Tuple2(_, s)) => acc + s.asInstanceOf[Double]
+                case (acc, js.Tuple2(_, s)) => acc + (s.asInstanceOf[Double] / 1000)
             }
           }
           backgroundColor = colorScheme.nextColor()
