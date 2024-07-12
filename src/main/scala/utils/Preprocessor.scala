@@ -13,6 +13,7 @@ class TimePreprocessor(matches: js.Date => Boolean) extends Preprocessor {
       matches(date)
     }
 }
+
 class SubstitutionPreprocessor(matches: String => Boolean, substitute: String => String) extends Preprocessor {
   def filter(data: js.Array[js.Dynamic]) =
     data.map { dyn =>

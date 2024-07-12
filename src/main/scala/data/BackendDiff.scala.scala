@@ -8,16 +8,16 @@ import utils.Color
 import org.scalajs.dom
 
 class BackendDiff(d: js.Array[js.Dynamic], backend1: String, backend2: String) extends LineStacked {
-  override lazy val chartTitle: String = s"Difference between execution time of backends ($backend1-$backend2)"
-  override lazy val xLabel = "benchmark date"
-  override lazy val yLabel = "time in seconds"
+  override def chartTitle: String = s"Difference between execution time of backends ($backend1-$backend2)"
+  override def xLabel = "date"
+  override def yLabel = "time in seconds"
 
   override def tooltipBody(idx: Int) = js.Array(
     f"Commit: ${d(idx).meta.commit}",
     f"Commit date: ${new js.Date(d(idx).meta.commitDate.asInstanceOf[String].toDouble * 1000).toLocaleString()}"
   )
 
-  lazy val chartData = {
+  def chartData = {
     val keys = js.Object.keys(d(0).selectDynamic(backend1).asInstanceOf[js.Object])
       .filter { k => k != "meta" && k != "total" }
 

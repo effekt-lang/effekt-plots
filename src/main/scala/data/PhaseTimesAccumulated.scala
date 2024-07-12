@@ -5,10 +5,10 @@ import scala.scalajs.js
 import typings.chartJs.mod.*
 import utils.Color
 
-class ByBenchmark(d: js.Array[js.Dynamic]) extends LineStacked {
-  override lazy val chartTitle: String = "Accumulated Phase Times per Benchmark"
-  override lazy val xLabel = "benchmark date"
-  override lazy val yLabel = "time in seconds"
+class PhaseTimesAccumulated(d: js.Array[js.Dynamic]) extends LineStacked {
+  override def chartTitle: String = "Accumulated Phase Times per Program"
+  override def xLabel = "date"
+  override def yLabel = "time in seconds"
 
   override def tooltipBody(idx: Int) = js.Array(
     f"Commit: ${d(idx).meta.commit}",

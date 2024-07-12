@@ -6,16 +6,16 @@ import typings.chartJs.mod.*
 import utils.Color
 
 class PhaseTimes(d: js.Array[js.Dynamic]) extends LineStacked {
-  override lazy val chartTitle: String = "Phase Times of Benchmarks"
-  override lazy val xLabel = "benchmark date"
-  override lazy val yLabel = "time in seconds"
+  override def chartTitle: String = "Phase Times of Programs"
+  override def xLabel = "benchmark date"
+  override def yLabel = "time in seconds"
 
   override def tooltipBody(idx: Int) = js.Array(
     f"Commit: ${d(idx).meta.commit}",
     f"Commit date: ${new js.Date(d(idx).meta.commitDate.asInstanceOf[String].toDouble * 1000).toLocaleString()}"
   )
 
-  lazy val chartData = {
+  def chartData = {
     val keys = js.Object.keys(d(0).asInstanceOf[js.Object])
       .filter { k => k != "meta" && k != "total" }
 

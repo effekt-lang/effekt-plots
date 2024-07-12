@@ -58,7 +58,7 @@ def renderPhaseSection(prefix: String, phasesData: js.Array[js.Dynamic]): HtmlEl
 
     // the standard library doesn't have elements here, so we don't draw total if empty
     if (js.Object.keys(filtered(0).total.asInstanceOf[js.Object]).length > 0)
-      ByBenchmark(filtered).draw()
+      PhaseTimesAccumulated(filtered).draw()
     else
       div(),
   )
@@ -90,7 +90,7 @@ def renderMetricsSection(metricsData: js.Array[js.Dynamic]): HtmlElement = {
 
   sectionTag(
     MemoryUsage(filtered).draw(),
-    TimeMeasure(filtered).draw(),
+    CompileTime(filtered).draw(),
     CpuUsage(filtered).draw(),
   )
 }
@@ -118,7 +118,7 @@ def renderPlots(timeFilter: js.Date => Boolean): HtmlElement = {
     renderMetricsSection(metricsData),
     h2("General metrics", flexBasis.percent(100)),
     CodeSize(codeSizeData).draw(),
-    BuildTime(buildTimeData).draw(),
+    EffektBuildTime(buildTimeData).draw(),
   )
 }
 

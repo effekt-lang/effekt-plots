@@ -7,10 +7,10 @@ import utils.Color
 
 import org.scalajs.dom
 
-class BuildTime(d: js.Array[js.Dynamic]) extends Line {
-  override lazy val chartTitle: String = "Time for Building Effekt"
-  override lazy val xLabel = "benchmark date"
-  override lazy val yLabel = "time in seconds"
+class EffektBuildTime(d: js.Array[js.Dynamic]) extends Line {
+  override def chartTitle: String = "Time for Building Effekt"
+  override def xLabel = "benchmark date"
+  override def yLabel = "time in seconds"
 
   override def tooltipBody(idx: Int) =
     dom.console.log(d)
@@ -20,7 +20,7 @@ class BuildTime(d: js.Array[js.Dynamic]) extends Line {
       f"Commit date: ${new js.Date(d(idx).meta.commitDate.asInstanceOf[String].toDouble * 1000).toLocaleString()}"
     )
 
-  lazy val chartData = {
+  def chartData = {
     new ChartData {
       labels = d.map { e => new js.Date(e.meta.currentDate.asInstanceOf[String].toDouble * 1000) }
       datasets = js.Array(

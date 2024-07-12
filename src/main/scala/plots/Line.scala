@@ -7,11 +7,11 @@ import scala.scalajs.js
 import org.scalajs.dom
 
 trait Line extends Generic {
-  lazy val chartData: ChartData
+  def chartData: ChartData
 
-  lazy val chartTitle = "Line Chart"
-  lazy val xLabel = "x axis"
-  lazy val yLabel = "y axis"
+  def chartTitle = "Line Chart"
+  def xLabel = "x axis"
+  def yLabel = "y axis"
 
   def tooltipBody(idx: Int) = js.Array("")
 

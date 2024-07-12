@@ -6,16 +6,16 @@ import typings.chartJs.mod.*
 import utils.Color
 
 class MemoryUsage(d: js.Array[js.Dynamic]) extends LineStacked {
-  override lazy val chartTitle: String = "Memory Usage of Benchmarks"
-  override lazy val xLabel = "benchmark date"
-  override lazy val yLabel = "memory usage in kilobyte"
+  override def chartTitle: String = "Memory Usage of Programs"
+  override def xLabel = "date"
+  override def yLabel = "memory usage in kilobyte"
 
   override def tooltipBody(idx: Int) = js.Array(
     f"Commit: ${d(idx).meta.commit}",
     f"Commit date: ${new js.Date(d(idx).meta.commitDate.asInstanceOf[String].toDouble * 1000).toLocaleString()}"
   )
 
-  lazy val chartData = {
+  def chartData = {
     val keys = js.Object.keys(d(0).asInstanceOf[js.Object])
       .filter { k => k != "meta" && k != "total" }
 
