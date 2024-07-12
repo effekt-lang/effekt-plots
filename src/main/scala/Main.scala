@@ -6,10 +6,15 @@ import org.scalajs.dom.XMLHttpRequest
 import scalajs.js
 import org.scalajs.dom.HTMLInputElement
 
-// TODO: figure this out automatically
-val trackedDirectories = js.Array(
+val trackedPhaseDirectories = js.Array(
   "examples/casestudies/",
   "/home/runner/work/effekt-plots/effekt-plots/effekt/libraries/",
+)
+
+val trackedBenchmarks = js.Array(
+  "are_we_fast_yet",
+  "duality_of_compilation",
+  "effect_handlers_bench"
 )
 
 val trackedIndividualBuild = js.Array(
@@ -39,24 +44,13 @@ def loadFile(name: String): js.Array[js.Dynamic] =
   xhr.send(null)
   js.JSON.parse(xhr.responseText).asInstanceOf[js.Array[js.Dynamic]]
 
-def renderBenchmarkSection(prefix: String, phasesData: js.Array[js.Dynamic]): HtmlElement = {
+def renderPhaseSection(prefix: String, phasesData: js.Array[js.Dynamic]): HtmlElement = {
   // filter the files in the data by prefix
-  val filtered = phasesData.map { dyn =>
-    js.Object.fromEntries(
-      js.Object.keys(dyn.asInstanceOf[js.Object]).map { (phase: String) =>
-        js.Tuple2(
-          phase,
-          js.Object.fromEntries(
-            js.Object.entries(dyn.selectDynamic(phase).asInstanceOf[js.Object]).filter { case js.Tuple2(key, value) =>
-              key.startsWith(prefix) || key.startsWith("./" + prefix) || phase == "meta"
-            }.map { case js.Tuple2(key, value) =>
-              js.Tuple2(key.replace("./" + prefix, "").replace(prefix, ""), value)
-            }
-          )
-        )
-      }
-    ).asInstanceOf[js.Dynamic]
-  }
+  val preprocessor = SubstitutionPreprocessor(
+    key => key.startsWith(prefix) || key.startsWith("./" + prefix),
+    key => key.replace("./" + prefix, "").replace(prefix, "")
+  )
+  val filtered = preprocessor.filter(phasesData)
 
   sectionTag(
     h3(prefix, flexBasis.percent(100)),
@@ -67,6 +61,19 @@ def renderBenchmarkSection(prefix: String, phasesData: js.Array[js.Dynamic]): Ht
       ByBenchmark(filtered).draw()
     else
       div(),
+  )
+}
+
+def renderBackendsSection(prefix: String, backendsData: js.Array[js.Dynamic]): HtmlElement = {
+  // filter the benchmarks in the data by prefix
+  val preprocessor = SubstitutionPreprocessor(_.startsWith(prefix + "/"), _.replace(prefix + "/", ""))
+  val filtered = preprocessor.filter(backendsData)
+
+  sectionTag(
+    h3(prefix, flexBasis.percent(100)),
+    Backends(filtered, "llvm").draw(),
+    Backends(filtered, "js").draw(),
+    BackendDiff(filtered, "js", "llvm").draw(),
   )
 }
 
@@ -88,8 +95,8 @@ def renderMetricsSection(metricsData: js.Array[js.Dynamic]): HtmlElement = {
   )
 }
 
-def renderPlots(timeFilter: TimeFilter): HtmlElement = {
-  val preprocessor = new Preprocessor(timeFilter)
+def renderPlots(timeFilter: js.Date => Boolean): HtmlElement = {
+  val preprocessor = new TimePreprocessor(timeFilter)
 
   val phasesData = preprocessor.filter(allData.phases)
   val codeSizeData = preprocessor.filter(allData.codeSize)
@@ -103,11 +110,9 @@ def renderPlots(timeFilter: TimeFilter): HtmlElement = {
   sectionTag(
     h2("Phase times", flexBasis.percent(100)),
     p("The time per phase is extracted using the Effekt `--time json` flag.", flexBasis.percent(100)),
-    trackedDirectories.map { (dir: String) => renderBenchmarkSection(dir, phasesData) },
+    trackedPhaseDirectories.map { (dir: String) => renderPhaseSection(dir, phasesData) },
     h2("Backend benchmarks", flexBasis.percent(100)),
-    Backends(backendsData, "llvm").draw(),
-    Backends(backendsData, "js").draw(),
-    BackendDiff(backendsData, "llvm", "js").draw(),
+    trackedBenchmarks.map { (benchmarks: String) => renderBackendsSection(benchmarks, backendsData) },
     h2("Build metrics", flexBasis.percent(100)),
     p("The metrics are gathered by measuring `effekt -b <file>` using `gnutime`. Therefore, these metrics include the overhead of JVM.", flexBasis.percent(100)),
     renderMetricsSection(metricsData),
