@@ -87,6 +87,7 @@ div#main section {
 .legend li {
     display: flex;
     align-items: center;
+    cursor: pointer;
 }
 
 .legend li span {
@@ -94,4 +95,8 @@ div#main section {
     width: 12px;
     height: 12px;
     margin: 0 5px;
+}
+
+.legend-unselected {
+    text-decoration: line-through;
 }
