@@ -1,5 +1,7 @@
 html, body {
     font-family: Arial, Helvetica, sans-serif;
+    padding: 0;
+    margin: 0;
 }
 
 .header {
@@ -37,10 +39,16 @@ div#main section {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+    width: calc(100vw - 32px);
+    padding: 16px;
 }
 
 /* mobile */
 @media(max-width: 1300px) {
+    div#main section div {
+        width: 100% !important;
+    }
+
     div#main section canvas {
         width: 100% !important;
         max-height: 60vh !important;

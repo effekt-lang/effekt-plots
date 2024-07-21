@@ -117,8 +117,10 @@ def renderPlots(timeFilter: js.Date => Boolean): HtmlElement = {
     p("The metrics are gathered by measuring `effekt -b <file>` using `gnutime`. Therefore, these metrics include the overhead of JVM.", flexBasis.percent(100)),
     renderMetricsSection(metricsData),
     h2("General metrics", flexBasis.percent(100)),
-    CodeSize(codeSizeData).draw(),
-    EffektBuildTime(buildTimeData).draw(),
+    sectionTag(
+      CodeSize(codeSizeData).draw(),
+      EffektBuildTime(buildTimeData).draw(),
+    ),
   )
 }
 
