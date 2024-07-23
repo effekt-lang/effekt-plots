@@ -7,7 +7,7 @@ import utils.Color
 
 class PhaseTimes(d: js.Array[js.Dynamic]) extends LineStacked {
   override def chartTitle: String = "Phase Times of Programs"
-  override def xLabel = "benchmark date"
+  override def xLabel = "date"
   override def yLabel = "time in seconds"
 
   override def tooltipBody(idx: Int) = js.Array(

@@ -8,7 +8,7 @@ import org.scalajs.dom.HTMLInputElement
 
 val trackedPhaseDirectories = js.Array(
   "examples/casestudies/",
-  "/home/runner/work/effekt-plots/effekt-plots/effekt/libraries/",
+  // "/home/runner/work/effekt-plots/effekt-plots/effekt/libraries/",
 )
 
 val trackedBenchmarks = js.Array(
@@ -73,7 +73,7 @@ def renderBackendsSection(prefix: String, backendsData: js.Array[js.Dynamic]): H
     h3(prefix, flexBasis.percent(100)),
     Backends(filtered, "llvm").draw(),
     Backends(filtered, "js").draw(),
-    BackendDiff(filtered, "js", "llvm").draw(),
+    // BackendDiff(filtered, "js", "llvm").draw(),
   )
 }
 

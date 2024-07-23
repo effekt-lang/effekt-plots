@@ -9,7 +9,7 @@ import org.scalajs.dom
 
 class EffektBuildTime(d: js.Array[js.Dynamic]) extends Line {
   override def chartTitle: String = "Time for Building Effekt"
-  override def xLabel = "benchmark date"
+  override def xLabel = "date"
   override def yLabel = "time in seconds"
 
   override def tooltipBody(idx: Int) =
