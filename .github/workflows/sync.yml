@@ -55,6 +55,11 @@ jobs:
           sudo apt update
           sudo apt install jq cloc
 
+      - name: Print system information
+        run: |
+          sudo apt install inxi
+          inxi -Fxz
+
       - name: Generate data
         run: |
           cd generate/ && ./main.sh
