@@ -29,7 +29,4 @@ combineMetrics() {
 		combineMetrics "$file"
 		echo "}"
 	done
-	echo "{\"total\":"
-	combineMetrics "time.out"
-	echo "}"
 } | jq -s 'add'

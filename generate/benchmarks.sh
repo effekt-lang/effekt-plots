@@ -12,7 +12,9 @@ for file in $FILES; do
 done
 
 # then build and run all with JSON phase timings
-"$(which time)" --verbose effekt.sh -o out/ --time json $FILES >/dev/null 2>../generate/time.out
+for file in $FILES; do
+	effekt.sh -o out/ --time json $file &>/dev/null
+done
 
 # now also measure execution time of backends based on benchmark configuration
 BACKENDS="llvm js"
