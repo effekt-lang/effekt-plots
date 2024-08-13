@@ -22,26 +22,38 @@ trait Generic {
     ctx.restore()
   }
 
-  val annotationPlugin = PluginServiceRegistrationOptions().setAfterDatasetDraw(
-    (chart, easing, options) => {
-      val ctx = chart.ctx
-      val testDate = new js.Date("Tue Jul 23 2024 14:52:00 GMT+0200")
-      val index = chart.data.labels.get.indexWhere { l =>
-        val date = l.asInstanceOf[js.Date]
+  def annotationPlugin(chart: Chart, options: js.UndefOr[Any]): Unit =
+    val ctx = chart.ctx
+    val testDate = new js.Date("Tue Jul 23 2024 14:52:00 GMT+0200")
+    val index = chart.data.labels.get.indexWhere { l =>
+      val date = l.asInstanceOf[js.Date]
 
-        // time frame of 5 minutes since tests run sequentially
-        (date.getTime - testDate.getTime).abs < 1000 * 60 * 5
-      }
-
-      if (index != -1) {
-        val meta = chart.getDatasetMeta(0)
-        val x = meta.data(index)._model.x
-        // for some reason ScalablyTyped doesn't know this API
-        val scale = chart.asInstanceOf[js.Dynamic].scales.`y-axis-0`
-        drawLine(ctx, x, scale.bottom.asInstanceOf[Double], scale.top.asInstanceOf[Double])
-      }
+      // time frame of 5 minutes since tests run sequentially
+      (date.getTime - testDate.getTime).abs < 1000 * 60 * 5
     }
-  )
+
+    if (index == -1)
+      return
+
+    val meta = chart.getDatasetMeta(0)
+    val x = meta.data(index)._model.x
+    // for some reason ScalablyTyped doesn't know this API
+    val scale = chart.asInstanceOf[js.Dynamic].scales.`y-axis-0`
+    val y1 = scale.bottom.asInstanceOf[Double]
+    val y2 = scale.top.asInstanceOf[Double]
+    drawLine(ctx, x, y1, y2)
+
+    // add line click handler
+    val canvas = chart.canvas
+    val rect = canvas.getBoundingClientRect()
+    chart.canvas.addEventListener("click", (event: js.Dynamic) => {
+      val clickX = event.clientX.asInstanceOf[Double] - rect.left
+      if (clickX > x - 5 && clickX < x + 5)
+        dom.console.log("clicked line!")
+      else dom.console.log(x - 5, clickX, x + 5)
+      event.stopImmediatePropagation()
+      event.stopPropagation()
+    }, true)
 
   def draw(): HtmlElement = {
     var optChart: Option[Chart] = None
@@ -52,7 +64,10 @@ trait Generic {
         onMountUnmountCallback(
           mount = { nodeCtx => 
             val ctx = nodeCtx.thisNode.ref
-            val extendedConfig = chartConfig.set("plugins", js.Array(annotationPlugin))
+            val plugin = PluginServiceRegistrationOptions().setAfterRender(
+              annotationPlugin
+            )
+            val extendedConfig = chartConfig.set("plugins", js.Array(plugin))
             val chart = Chart.apply.newInstance2(ctx, extendedConfig)
             legend.ref.innerHTML = chart.generateLegend().toString()
             legend.ref.children(0).children.zipWithIndex.foreach { (child, index) =>
