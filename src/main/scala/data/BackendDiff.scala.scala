@@ -4,8 +4,9 @@ import plots.LineStacked
 import scala.scalajs.js
 import typings.chartJs.mod.*
 import utils.Color
+import utils.AnnotationContext
 
-class BackendDiff(d: js.Array[js.Dynamic], backend1: String, backend2: String) extends LineStacked {
+class BackendDiff(d: js.Array[js.Dynamic], backend1: String, backend2: String)(implicit C: AnnotationContext) extends LineStacked {
   override def chartTitle: String = s"Difference between execution time of backends ($backend1-$backend2)"
   override def xLabel = "date"
   override def yLabel = "time in seconds"

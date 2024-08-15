@@ -4,8 +4,9 @@ import plots.LineStacked
 import scala.scalajs.js
 import typings.chartJs.mod.*
 import utils.Color
+import utils.AnnotationContext
 
-class PhaseTimesAccumulated(d: js.Array[js.Dynamic]) extends LineStacked {
+class PhaseTimesAccumulated(d: js.Array[js.Dynamic])(implicit C: AnnotationContext) extends LineStacked {
   override def chartTitle: String = "Accumulated Phase Times per Program"
   override def xLabel = "date"
   override def yLabel = "time in seconds"

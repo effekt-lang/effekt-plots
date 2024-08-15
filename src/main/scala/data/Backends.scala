@@ -4,10 +4,9 @@ import plots.LineStacked
 import scala.scalajs.js
 import typings.chartJs.mod.*
 import utils.Color
+import utils.AnnotationContext
 
-import org.scalajs.dom
-
-class Backends(d: js.Array[js.Dynamic], backend: String) extends LineStacked {
+class Backends(d: js.Array[js.Dynamic], backend: String)(implicit C: AnnotationContext) extends LineStacked {
   override def chartTitle: String = s"Execution time for backend $backend"
   override def xLabel = "date"
   override def yLabel = "time in seconds"

@@ -4,8 +4,9 @@ import plots.LineStacked
 import scala.scalajs.js
 import typings.chartJs.mod.*
 import utils.Color
+import utils.AnnotationContext
 
-class CodeSize(d: js.Array[js.Dynamic]) extends LineStacked {
+class CodeSize(d: js.Array[js.Dynamic])(implicit C: AnnotationContext) extends LineStacked {
   override def chartTitle: String = "Code Size of Entire Repository"
   override def xLabel = "date"
   override def yLabel = "lines of code"
