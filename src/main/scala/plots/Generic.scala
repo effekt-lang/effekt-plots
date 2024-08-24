@@ -2,6 +2,7 @@ package plots
 
 import scalajs.js
 import typings.chartJs.mod.*
+import typings.sweetalert2.mod.default.*
 import com.raquo.laminar.api.L.{*, given}
 import utils.Color
 import utils.AnnotationContext
@@ -23,6 +24,12 @@ trait Generic(implicit C: AnnotationContext) {
     ctx.stroke()
     ctx.restore()
   }
+
+  def showAnnotation(reason: String) =
+    fire(
+      title="Reason",
+      html=reason
+    )
 
   def annotationPlugin(chart: Chart, options: js.UndefOr[Any]): Unit =
     val ctx = chart.ctx
@@ -55,7 +62,7 @@ trait Generic(implicit C: AnnotationContext) {
         val clickHandler: js.Function1[js.Dynamic, Unit] = (event: js.Dynamic) => {
           val clickX = event.clientX.asInstanceOf[Double] - rect.left
           if (clickX > x - 5 && clickX < x + 5)
-            dom.console.log("clicked line!", annotation.reason)
+            showAnnotation(annotation.reason)
         }
         chart.canvas.addEventListener("click", clickHandler, false)
 

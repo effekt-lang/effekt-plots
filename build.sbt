@@ -12,6 +12,7 @@ lazy val root = project
       "chart.js" -> "2.9.4",
       // we can't use newer chart.js since @types/chart.js is out of date
       "@types/chart.js" -> "2.9.41",
+      "sweetalert2" -> "11.12.4",
     ),
 
     libraryDependencies += "com.raquo" %%% "laminar" % "16.0.0",
