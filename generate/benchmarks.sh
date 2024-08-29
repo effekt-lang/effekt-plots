@@ -13,7 +13,7 @@ done
 
 # then build and run all with JSON phase timings
 for file in $FILES; do
-	effekt.sh -o out/ --time json $file &>/dev/null
+	effekt.sh -o out/ --time json "$file" &>/dev/null
 done
 
 # now also measure execution time of backends based on benchmark configuration
@@ -23,10 +23,9 @@ for backend in $BACKENDS; do
 	log="benchmarks_$backend.log"
 	>"$log"
 	while read config; do
-		echo "$config"
 		arr=($config)
 		file="examples/benchmarks/${arr[0]}/${arr[1]}.effekt"
-		printf "${arr[0]}/${arr[1]} ${arr[2]} " >>$log
-		time effekt.sh --backend "$backend" "$file" -- ${arr[2]} >>$log
-	done <../generate/benchmark_config.txt
+		printf "${arr[0]}/${arr[1]} ${arr[2]} " >>"$log"
+		effekt.sh --backend "$backend" "$file" -- "${arr[2]}" >>"$log"
+	done <"../generate/benchmark_config_$backend.txt"
 done

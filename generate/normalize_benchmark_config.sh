@@ -1,6 +1,8 @@
 #!/bin/env bash
 set +e
 
+echo "WARNING: This normalization is very basic and may not always find a fitting argument." >&2
+
 BACKEND="llvm"
 ARG_INIT=2
 TIMEOUT=10          # in seconds
