@@ -24,8 +24,8 @@ for backend in $BACKENDS; do
 	>"$log"
 	while read config; do
 		arr=($config)
-		file="examples/benchmarks/${arr[0]}/${arr[1]}.effekt"
-		printf "${arr[0]}/${arr[1]} ${arr[2]} " >>"$log"
-		effekt.sh --backend "$backend" "$file" -- "${arr[2]}" >>"$log"
+		file="examples/benchmarks/${arr[0]}.effekt"
+		printf "${arr[0]} ${arr[1]} " >>"$log"
+		effekt.sh --backend "$backend" "$file" -- "${arr[1]}" >>"$log"
 	done <"../generate/benchmark_config_$backend.txt"
 done
