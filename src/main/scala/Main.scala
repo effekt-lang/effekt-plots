@@ -24,6 +24,7 @@ val trackedIndividualBuild = js.Array(
 case class Data(
   phases: js.Array[js.Dynamic],
   codeSize: js.Array[js.Dynamic],
+  generatedCodeSize: js.Array[js.Dynamic],
   metrics: js.Array[js.Dynamic],
   buildTime: js.Array[js.Dynamic],
   backends: js.Array[js.Dynamic],
@@ -32,6 +33,7 @@ case class Data(
 val allData = Data(
   loadFile("phases"),
   loadFile("cloc"),
+  loadFile("out_loc"),
   loadFile("metrics"),
   loadFile("build"),
   loadFile("backends"),
@@ -100,6 +102,7 @@ def renderPlots(timeFilter: js.Date => Boolean): HtmlElement = {
 
   val phasesData = preprocessor.filter(allData.phases)
   val codeSizeData = preprocessor.filter(allData.codeSize)
+  val generatedCodeSizeData = preprocessor.filter(allData.generatedCodeSize)
   val buildTimeData = preprocessor.filter(allData.buildTime)
   val metricsData = preprocessor.filter(allData.metrics)
   val backendsData = preprocessor.filter(allData.backends)
@@ -118,6 +121,8 @@ def renderPlots(timeFilter: js.Date => Boolean): HtmlElement = {
     renderMetricsSection(metricsData),
     h2("General metrics", flexBasis.percent(100)),
     sectionTag(
+      GeneratedCodeSize(generatedCodeSizeData, "llvm").draw(),
+      GeneratedCodeSize(generatedCodeSizeData, "js").draw(),
       CodeSize(codeSizeData).draw(),
       EffektBuildTime(buildTimeData).draw(),
     ),
