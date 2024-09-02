@@ -5,6 +5,7 @@ set -e
 
 ./benchmarks.sh
 ./cloc.sh | ./append.sh cloc.json
+./out_loc.sh | ./append.sh out_loc.json
 ./phases.sh | ./append.sh phases.json
 ./metrics.sh | ./append.sh metrics.json
 ./backends.sh | ./append.sh backends.json
