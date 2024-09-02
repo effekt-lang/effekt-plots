@@ -27,5 +27,5 @@ for backend in $BACKENDS; do
 		file="examples/benchmarks/${arr[0]}.effekt"
 		printf "${arr[0]} ${arr[1]} " >>"$log"
 		effekt.sh --backend "$backend" "$file" -- "${arr[1]}" >>"$log"
-	done <"../generate/benchmark_config_$backend.txt"
+	done <"examples/benchmarks/config_$backend.txt"
 done
