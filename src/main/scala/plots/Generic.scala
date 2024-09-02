@@ -35,8 +35,8 @@ trait Generic(implicit C: AnnotationContext) {
     val ctx = chart.ctx
     val chartId = chart.asInstanceOf[js.Dynamic].id.asInstanceOf[Int]
 
-    boundary {
-      C.annotations.foreach { annotation =>
+    C.annotations.foreach { annotation =>
+      boundary {
         val index = chart.data.labels.get.indexWhere { l =>
           val date = l.asInstanceOf[js.Date]
 
