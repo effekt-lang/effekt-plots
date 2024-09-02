@@ -40,8 +40,9 @@ trait Generic(implicit C: AnnotationContext) {
         val index = chart.data.labels.get.indexWhere { l =>
           val date = l.asInstanceOf[js.Date]
 
-          // time frame of 5 minutes since tests run sequentially
-          (date.getTime - annotation.date.getTime).abs < 1000 * 60 * 5
+          // time frame of 20 minutes since tests run sequentially
+          // includes effekt build time, so this is chosen very broadly
+          (date.getTime - annotation.date.getTime).abs < 1000 * 60 * 20
         }
 
         // specific date not found (e.g. not in filtered range)
@@ -61,7 +62,7 @@ trait Generic(implicit C: AnnotationContext) {
         val rect = canvas.getBoundingClientRect()
         val clickHandler: js.Function1[js.Dynamic, Unit] = (event: js.Dynamic) => {
           val clickX = event.clientX.asInstanceOf[Double] - rect.left
-          if (clickX > x - 5 && clickX < x + 5)
+          if (clickX > x - 10 && clickX < x + 10)
             showAnnotation(annotation.reason)
         }
         chart.canvas.addEventListener("click", clickHandler, false)
