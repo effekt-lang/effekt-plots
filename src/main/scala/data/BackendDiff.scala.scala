@@ -16,11 +16,13 @@ class BackendDiff(d: js.Array[js.Dynamic], backend1: String, backend2: String)(i
     f"Commit date: ${new js.Date(d(idx).meta.commitDate.asInstanceOf[String].toDouble * 1000).toLocaleString()}"
   )
 
-  def chartData = {
+  def chartDataOpt = {
+    if (d.isEmpty) return None
+
     val keys = js.Object.keys(d(0).selectDynamic(backend1).asInstanceOf[js.Object])
       .filter { k => k != "meta" && k != "total" }
 
-    new ChartData {
+    Some(new ChartData {
       labels = d.map { e => new js.Date(e.meta.currentDate.asInstanceOf[String].toDouble * 1000) }
       datasets = keys.map { key =>
         new ChartDataSets {
@@ -32,6 +34,6 @@ class BackendDiff(d: js.Array[js.Dynamic], backend1: String, backend2: String)(i
           backgroundColor = colorScheme.nextColor()
         }
       }
-    }
+    })
   }
 }

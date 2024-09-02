@@ -7,7 +7,7 @@ import scala.scalajs.js
 import org.scalajs.dom
 
 trait Line extends Generic {
-  def chartData: ChartData
+  def chartDataOpt: Option[ChartData]
 
   def chartTitle = "Line Chart"
   def xLabel = "x axis"
@@ -15,7 +15,7 @@ trait Line extends Generic {
 
   def tooltipBody(idx: Int) = js.Array("")
 
-  val chartConfig = new ChartConfiguration {
+  val chartConfigOpt = chartDataOpt.map { chartData => new ChartConfiguration {
     `type` = ChartType.line
     data = chartData
     options = new ChartOptions {
@@ -66,5 +66,5 @@ trait Line extends Generic {
         )
       }
     }
-  }
+  }}
 }

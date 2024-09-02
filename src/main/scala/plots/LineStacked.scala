@@ -6,7 +6,7 @@ import com.raquo.laminar.api.L.{*, given}
 import scala.scalajs.js
 
 trait LineStacked extends Generic {
-  def chartData: ChartData
+  def chartDataOpt: Option[ChartData]
 
   def chartTitle = "Stacked Line Chart"
   def xLabel = "x axis"
@@ -14,7 +14,7 @@ trait LineStacked extends Generic {
 
   def tooltipBody(idx: Int) = js.Array("")
 
-  val chartConfig = new ChartConfiguration {
+  val chartConfigOpt = chartDataOpt.map { chartData => new ChartConfiguration {
     `type` = ChartType.line
     data = chartData
     options = new ChartOptions {
@@ -67,5 +67,5 @@ trait LineStacked extends Generic {
         )
       }
     }
-  }
+  }}
 }

@@ -16,11 +16,13 @@ class GeneratedCodeSize(d: js.Array[js.Dynamic], backend: String)(implicit C: An
     f"Commit date: ${new js.Date(d(idx).meta.commitDate.asInstanceOf[String].toDouble * 1000).toLocaleString()}"
   )
 
-  def chartData = {
+  def chartDataOpt = {
+    if (d.isEmpty) return None
+
     val keys = js.Object.keys(d(0).selectDynamic(backend).asInstanceOf[js.Object])
       .filter { k => k != "meta" && k != "SUM" }
 
-    new ChartData {
+    Some(new ChartData {
       labels = d.map { e => new js.Date(e.meta.currentDate.asInstanceOf[String].toDouble * 1000) }
       datasets = keys.map { key =>
         new ChartDataSets {
@@ -33,6 +35,6 @@ class GeneratedCodeSize(d: js.Array[js.Dynamic], backend: String)(implicit C: An
           backgroundColor = colorScheme.nextColor()
         }
       }
-    }
+    })
   }
 }

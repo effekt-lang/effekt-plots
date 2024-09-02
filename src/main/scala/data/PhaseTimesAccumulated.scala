@@ -16,11 +16,13 @@ class PhaseTimesAccumulated(d: js.Array[js.Dynamic])(implicit C: AnnotationConte
     f"Commit date: ${new js.Date(d(idx).meta.commitDate.asInstanceOf[String].toDouble * 1000).toLocaleString()}"
   )
 
-  lazy val chartData = {
+  def chartDataOpt = {
+    if (d.isEmpty) return None
+
     val keys = js.Object.keys(d(0).total.asInstanceOf[js.Object])
     val colorScheme = Color()
 
-    new ChartData {
+    Some(new ChartData {
       labels = d.map { e => new js.Date(e.meta.currentDate.asInstanceOf[String].toDouble * 1000) }
       datasets = keys.map { key =>
         new ChartDataSets {
@@ -29,6 +31,6 @@ class PhaseTimesAccumulated(d: js.Array[js.Dynamic])(implicit C: AnnotationConte
           backgroundColor = colorScheme.nextColor()
         }
       }
-    }
+    })
   }
 }

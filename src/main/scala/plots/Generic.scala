@@ -10,7 +10,7 @@ import scala.util.boundary
 import org.scalajs.dom
 
 trait Generic(implicit C: AnnotationContext) {
-  val chartConfig: ChartConfiguration
+  val chartConfigOpt: Option[ChartConfiguration]
 
   val colorScheme = Color()
 
@@ -75,38 +75,43 @@ trait Generic(implicit C: AnnotationContext) {
         C.handlers((chartId, annotation.id)) = clickHandler
       }
     }
-
-  def draw(): HtmlElement = {
+  
+  def drawPlot(legend: HtmlElement, chartConfig: ChartConfiguration): HtmlElement =
     var optChart: Option[Chart] = None
-    val legend = div(className := "legend")
-    div(
-      legend,
-      canvasTag(
-        onMountUnmountCallback(
-          mount = { nodeCtx => 
-            val ctx = nodeCtx.thisNode.ref
-            val plugin = PluginServiceRegistrationOptions().setBeforeDatasetDraw(
-              annotationPlugin
-            )
-            val extendedConfig = chartConfig.set("plugins", js.Array(plugin))
-            val chart = Chart.apply.newInstance2(ctx, extendedConfig)
-            legend.ref.innerHTML = chart.generateLegend().toString()
-            legend.ref.children(0).children.zipWithIndex.foreach { (child, index) =>
-              child.addEventListener("click", _ => {
-                val meta = chart.getDatasetMeta(index)
-                meta.hidden = !meta.hidden.getOrElse(true)
-                chart.update()
-                child.classList.toggle("legend-unselected")
-              })
-            }
-            optChart = Some(chart)
-          },
-          unmount = { thisNode => 
-            optChart.map { _.destroy() }
-            optChart = None
+    canvasTag(
+      onMountUnmountCallback(
+        mount = { nodeCtx => 
+          val ctx = nodeCtx.thisNode.ref
+          val plugin = PluginServiceRegistrationOptions().setBeforeDatasetDraw(
+            annotationPlugin
+          )
+          val extendedConfig = chartConfig.set("plugins", js.Array(plugin))
+          val chart = Chart.apply.newInstance2(ctx, extendedConfig)
+          legend.ref.innerHTML = chart.generateLegend().toString()
+          legend.ref.children(0).children.zipWithIndex.foreach { (child, index) =>
+            child.addEventListener("click", _ => {
+              val meta = chart.getDatasetMeta(index)
+              meta.hidden = !meta.hidden.getOrElse(true)
+              chart.update()
+              child.classList.toggle("legend-unselected")
+            })
           }
-        )
+          optChart = Some(chart)
+        },
+        unmount = { thisNode => 
+          optChart.map { _.destroy() }
+          optChart = None
+        }
       )
     )
+
+  def draw(): HtmlElement = {
+    val legend = div(className := "legend")
+    chartConfigOpt.map { chartConfig =>
+      div(
+        legend,
+        drawPlot(legend, chartConfig)
+      )
+    }.getOrElse(div())
   }
 }

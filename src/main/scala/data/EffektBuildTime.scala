@@ -17,8 +17,8 @@ class EffektBuildTime(d: js.Array[js.Dynamic])(implicit C: AnnotationContext) ex
       f"Commit date: ${new js.Date(d(idx).meta.commitDate.asInstanceOf[String].toDouble * 1000).toLocaleString()}"
     )
 
-  def chartData = {
-    new ChartData {
+  def chartDataOpt = {
+    Some(new ChartData {
       labels = d.map { e => new js.Date(e.meta.currentDate.asInstanceOf[String].toDouble * 1000) }
       datasets = js.Array(
         new ChartDataSets {
@@ -29,6 +29,6 @@ class EffektBuildTime(d: js.Array[js.Dynamic])(implicit C: AnnotationContext) ex
           borderColor = backgroundColor
         }
       )
-    }
+    })
   }
 }
