@@ -31,7 +31,7 @@ trait Generic(implicit C: AnnotationContext) {
       html=reason
     )
 
-  def annotationPlugin(chart: Chart, options: js.UndefOr[Any]): Unit =
+  def annotationPlugin(chart: Chart, easing: Easing, options: js.UndefOr[Any]): Unit =
     val ctx = chart.ctx
     val chartId = chart.asInstanceOf[js.Dynamic].id.asInstanceOf[Int]
 
@@ -85,7 +85,7 @@ trait Generic(implicit C: AnnotationContext) {
         onMountUnmountCallback(
           mount = { nodeCtx => 
             val ctx = nodeCtx.thisNode.ref
-            val plugin = PluginServiceRegistrationOptions().setAfterRender(
+            val plugin = PluginServiceRegistrationOptions().setBeforeDatasetDraw(
               annotationPlugin
             )
             val extendedConfig = chartConfig.set("plugins", js.Array(plugin))
