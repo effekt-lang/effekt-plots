@@ -28,6 +28,7 @@ case class Data(
   metrics: js.Array[js.Dynamic],
   buildTime: js.Array[js.Dynamic],
   backends: js.Array[js.Dynamic],
+  annotations: js.Array[js.Dynamic],
 )
 
 val allData = Data(
@@ -37,6 +38,7 @@ val allData = Data(
   loadFile("metrics"),
   loadFile("build"),
   loadFile("backends"),
+  loadFile("annotations"),
 )
 
 // TODO: this should be async
@@ -46,7 +48,7 @@ def loadFile(name: String): js.Array[js.Dynamic] =
   xhr.send(null)
   js.JSON.parse(xhr.responseText).asInstanceOf[js.Array[js.Dynamic]]
 
-def renderPhaseSection(prefix: String, phasesData: js.Array[js.Dynamic]): HtmlElement = {
+def renderPhaseSection(prefix: String, phasesData: js.Array[js.Dynamic])(implicit C: AnnotationContext): HtmlElement = {
   // filter the files in the data by prefix
   val preprocessor = SubstitutionPreprocessor(
     key => key.startsWith(prefix) || key.startsWith("./" + prefix),
@@ -56,30 +58,30 @@ def renderPhaseSection(prefix: String, phasesData: js.Array[js.Dynamic]): HtmlEl
 
   sectionTag(
     h3(prefix, flexBasis.percent(100)),
-    PhaseTimes(filtered).draw(),
+    PhaseTimes(filtered)(using C).draw(),
 
     // the standard library doesn't have elements here, so we don't draw total if empty
     if (js.Object.keys(filtered(0).total.asInstanceOf[js.Object]).length > 0)
-      PhaseTimesAccumulated(filtered).draw()
+      PhaseTimesAccumulated(filtered)(using C).draw()
     else
       div(),
   )
 }
 
-def renderBackendsSection(prefix: String, backendsData: js.Array[js.Dynamic]): HtmlElement = {
+def renderBackendsSection(prefix: String, backendsData: js.Array[js.Dynamic])(implicit C: AnnotationContext): HtmlElement = {
   // filter the benchmarks in the data by prefix
   val preprocessor = SubstitutionPreprocessor(_.startsWith(prefix + "/"), _.replace(prefix + "/", ""))
   val filtered = preprocessor.filter(backendsData)
 
   sectionTag(
     h3(prefix, flexBasis.percent(100)),
-    Backends(filtered, "llvm").draw(),
-    Backends(filtered, "js").draw(),
+    Backends(filtered, "llvm")(using C).draw(),
+    Backends(filtered, "js")(using C).draw(),
     // BackendDiff(filtered, "js", "llvm").draw(),
   )
 }
 
-def renderMetricsSection(metricsData: js.Array[js.Dynamic]): HtmlElement = {
+def renderMetricsSection(metricsData: js.Array[js.Dynamic])(implicit C: AnnotationContext): HtmlElement = {
   val files = trackedIndividualBuild
 
   val filtered = metricsData.map { dyn =>
@@ -91,14 +93,15 @@ def renderMetricsSection(metricsData: js.Array[js.Dynamic]): HtmlElement = {
   }
 
   sectionTag(
-    MemoryUsage(filtered).draw(),
-    CompileTime(filtered).draw(),
-    CpuUsage(filtered).draw(),
+    MemoryUsage(filtered)(using C).draw(),
+    CompileTime(filtered)(using C).draw(),
+    CpuUsage(filtered)(using C).draw(),
   )
 }
 
 def renderPlots(timeFilter: js.Date => Boolean): HtmlElement = {
   val preprocessor = new TimePreprocessor(timeFilter)
+  val C = new AnnotationContext(allData.annotations)
 
   val phasesData = preprocessor.filter(allData.phases)
   val codeSizeData = preprocessor.filter(allData.codeSize)
@@ -113,18 +116,18 @@ def renderPlots(timeFilter: js.Date => Boolean): HtmlElement = {
   sectionTag(
     h2("Phase times", flexBasis.percent(100)),
     p("The time per phase is extracted using the Effekt `--time json` flag.", flexBasis.percent(100)),
-    trackedPhaseDirectories.map { (dir: String) => renderPhaseSection(dir, phasesData) },
+    trackedPhaseDirectories.map { (dir: String) => renderPhaseSection(dir, phasesData)(using C) },
     h2("Backend benchmarks", flexBasis.percent(100)),
-    trackedBenchmarks.map { (benchmarks: String) => renderBackendsSection(benchmarks, backendsData) },
+    trackedBenchmarks.map { (benchmarks: String) => renderBackendsSection(benchmarks, backendsData)(using C) },
     h2("Build metrics", flexBasis.percent(100)),
     p("The metrics are gathered by measuring `effekt -b <file>` using `gnutime`. Therefore, these metrics include the overhead of JVM.", flexBasis.percent(100)),
-    renderMetricsSection(metricsData),
+    renderMetricsSection(metricsData)(using C),
     h2("General metrics", flexBasis.percent(100)),
     sectionTag(
-      GeneratedCodeSize(generatedCodeSizeData, "llvm").draw(),
-      GeneratedCodeSize(generatedCodeSizeData, "js").draw(),
-      CodeSize(codeSizeData).draw(),
-      EffektBuildTime(buildTimeData).draw(),
+      GeneratedCodeSize(generatedCodeSizeData, "llvm")(using C).draw(),
+      GeneratedCodeSize(generatedCodeSizeData, "js")(using C).draw(),
+      CodeSize(codeSizeData)(using C).draw(),
+      EffektBuildTime(buildTimeData)(using C).draw(),
     ),
   )
 }

@@ -4,8 +4,9 @@ import plots.LineStacked
 import scala.scalajs.js
 import typings.chartJs.mod.*
 import utils.Color
+import utils.AnnotationContext
 
-class GeneratedCodeSize(d: js.Array[js.Dynamic], backend: String) extends LineStacked {
+class GeneratedCodeSize(d: js.Array[js.Dynamic], backend: String)(implicit C: AnnotationContext) extends LineStacked {
   override def chartTitle: String = "Generated Code Size of Benchmarks"
   override def xLabel = "date"
   override def yLabel = "lines of code"
