@@ -58,11 +58,11 @@ def renderPhaseSection(prefix: String, phasesData: js.Array[js.Dynamic])(implici
 
   sectionTag(
     h3(prefix, flexBasis.percent(100)),
-    PhaseTimes(filtered)(using C).draw(),
+    PhaseTimes(filtered).draw(),
 
     // the standard library doesn't have elements here, so we don't draw total if empty
     if (js.Object.keys(filtered(0).total.asInstanceOf[js.Object]).length > 0)
-      PhaseTimesAccumulated(filtered)(using C).draw()
+      PhaseTimesAccumulated(filtered).draw()
     else
       div(),
   )
@@ -75,8 +75,8 @@ def renderBackendsSection(prefix: String, backendsData: js.Array[js.Dynamic])(im
 
   sectionTag(
     h3(prefix, flexBasis.percent(100)),
-    Backends(filtered, "llvm")(using C).draw(),
-    Backends(filtered, "js")(using C).draw(),
+    Backends(filtered, "llvm").draw(),
+    Backends(filtered, "js").draw(),
     // BackendDiff(filtered, "js", "llvm").draw(),
   )
 }
@@ -93,15 +93,16 @@ def renderMetricsSection(metricsData: js.Array[js.Dynamic])(implicit C: Annotati
   }
 
   sectionTag(
-    MemoryUsage(filtered)(using C).draw(),
-    CompileTime(filtered)(using C).draw(),
-    CpuUsage(filtered)(using C).draw(),
+    MemoryUsage(filtered).draw(),
+    CompileTime(filtered).draw(),
+    CpuUsage(filtered).draw(),
   )
 }
 
 def renderPlots(timeFilter: js.Date => Boolean): HtmlElement = {
+  given C: AnnotationContext = new AnnotationContext(allData.annotations)
+
   val preprocessor = new TimePreprocessor(timeFilter)
-  val C = new AnnotationContext(allData.annotations)
 
   val phasesData = preprocessor.filter(allData.phases)
   val codeSizeData = preprocessor.filter(allData.codeSize)
@@ -116,18 +117,18 @@ def renderPlots(timeFilter: js.Date => Boolean): HtmlElement = {
   sectionTag(
     h2("Phase times", flexBasis.percent(100)),
     p("The time per phase is extracted using the Effekt `--time json` flag.", flexBasis.percent(100)),
-    trackedPhaseDirectories.map { (dir: String) => renderPhaseSection(dir, phasesData)(using C) },
+    trackedPhaseDirectories.map { (dir: String) => renderPhaseSection(dir, phasesData) },
     h2("Backend benchmarks", flexBasis.percent(100)),
-    trackedBenchmarks.map { (benchmarks: String) => renderBackendsSection(benchmarks, backendsData)(using C) },
+    trackedBenchmarks.map { (benchmarks: String) => renderBackendsSection(benchmarks, backendsData) },
     h2("Build metrics", flexBasis.percent(100)),
     p("The metrics are gathered by measuring `effekt -b <file>` using `gnutime`. Therefore, these metrics include the overhead of JVM.", flexBasis.percent(100)),
-    renderMetricsSection(metricsData)(using C),
+    renderMetricsSection(metricsData),
     h2("General metrics", flexBasis.percent(100)),
     sectionTag(
-      GeneratedCodeSize(generatedCodeSizeData, "llvm")(using C).draw(),
-      GeneratedCodeSize(generatedCodeSizeData, "js")(using C).draw(),
-      CodeSize(codeSizeData)(using C).draw(),
-      EffektBuildTime(buildTimeData)(using C).draw(),
+      GeneratedCodeSize(generatedCodeSizeData, "llvm").draw(),
+      GeneratedCodeSize(generatedCodeSizeData, "js").draw(),
+      CodeSize(codeSizeData).draw(),
+      EffektBuildTime(buildTimeData).draw(),
     ),
   )
 }
