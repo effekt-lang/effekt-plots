@@ -40,4 +40,4 @@ while read config; do
 			continue
 		fi
 	done
-done <../generate/benchmark_config.txt
+done <examples/benchmarks/config_"$BACKEND".txt
