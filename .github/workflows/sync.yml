@@ -53,7 +53,7 @@ jobs:
       - name: Install generator dependencies
         run: |
           sudo apt update
-          sudo apt install jq cloc
+          sudo apt install jq cloc python3
 
       - name: Print system information
         run: |
@@ -63,6 +63,12 @@ jobs:
       - name: Generate data
         run: |
           cd generate/ && ./main.sh
+
+      - name: Detect outliers
+        run: |
+          cd alerts/ && ./main.sh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push new data
         run: |
