@@ -53,7 +53,7 @@ if outliers:
     print(
         "\n".join(
             [
-                f"- Backend: {outlier["backend"]}, file: `{outlier["file"]}`, time: {outlier["value"] / 1e9:.3f}s (μ={outlier["mean"]/1e9:.3f}s, σ={outlier["sd"]/1e9:.3f}s)"
+                f"- Backend: {outlier['backend']}, file: `{outlier['file']}`, time: {outlier['value'] / 1e9:.3f}s (μ={outlier['mean']/1e9:.3f}s, σ={outlier['sd']/1e9:.3f}s)"
                 for outlier in outliers
             ]
         )
