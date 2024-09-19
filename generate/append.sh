@@ -13,6 +13,14 @@ cd -
 annotated=$(jq --arg commit "$commit" --arg commitDate "$commitDate" --arg currentDate "$currentDate" \
 	'. + {meta: {commit: $commit, commitDate: $commitDate, currentDate: $currentDate}}' - <&0)
 
+# split data dumps by year+month
+currentMonth=$(date +%Y%m)
+outFile="$DATA/$1/$currentMonth.json"
+
+if [ ! -f "$outFile" ]; then
+	echo "[]" >"$outFile"
+fi
+
 # append to existing data
-echo "$annotated" | jq '(. += [input]) | sort_by(.meta.commitDate)' "$DATA"/"$1" - >"$1".temp
-mv "$1.temp" "$DATA"/"$1" # sponge
+echo "$annotated" | jq '(. += [input]) | sort_by(.meta.commitDate)' "$outFile" - >"$1".temp
+mv "$1.temp" "$outFile" # sponge

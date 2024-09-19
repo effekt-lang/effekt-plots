@@ -1,14 +1,14 @@
 #!/bin/env bash
 set -e
 
-./build.sh | ./append.sh build.json
+./build.sh | ./append.sh build
 
 ./benchmarks.sh
-./cloc.sh | ./append.sh cloc.json
-./out_loc.sh | ./append.sh out_loc.json
-./phases.sh | ./append.sh phases.json
-./metrics.sh | ./append.sh metrics.json
-./backends.sh | ./append.sh backends.json
+./cloc.sh | ./append.sh cloc
+./out_loc.sh | ./append.sh out_loc
+./phases.sh | ./append.sh phases
+./metrics.sh | ./append.sh metrics
+./backends.sh | ./append.sh backends
 
 # reset effekt repository
 git -C ../effekt/ checkout .
