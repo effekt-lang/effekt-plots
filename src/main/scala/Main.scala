@@ -3,8 +3,9 @@ import utils._
 import org.scalajs.dom
 import com.raquo.laminar.api.L.{*, given}
 import org.scalajs.dom.XMLHttpRequest
-import scalajs.js
 import org.scalajs.dom.HTMLInputElement
+import scalajs.js
+import scala.collection.mutable.HashMap
 
 val trackedPhaseDirectories = js.Array(
   "examples/casestudies/",
@@ -21,6 +22,8 @@ val trackedIndividualBuild = js.Array(
   "examples/casestudies/prettyprinter.effekt.md"
 )
 
+case class DateInterval(start: js.Date, end: js.Date)
+
 case class Data(
   phases: js.Array[js.Dynamic],
   codeSize: js.Array[js.Dynamic],
@@ -31,22 +34,38 @@ case class Data(
   annotations: js.Array[js.Dynamic],
 )
 
-val allData = Data(
-  loadFile("phases"),
-  loadFile("cloc"),
-  loadFile("out_loc"),
-  loadFile("metrics"),
-  loadFile("build"),
-  loadFile("backends"),
-  loadFile("annotations"),
+def allDataInRange(interval: DateInterval) = Data(
+  loadJsonByDate(interval, "phases"),
+  loadJsonByDate(interval, "cloc"),
+  loadJsonByDate(interval, "out_loc"),
+  loadJsonByDate(interval, "metrics"),
+  loadJsonByDate(interval, "build"),
+  loadJsonByDate(interval, "backends"),
+  loadJson("annotations"),
 )
 
-// TODO: this should be async
-def loadFile(name: String): js.Array[js.Dynamic] = 
+def loadJsonByDate(interval: DateInterval, name: String): js.Array[js.Dynamic] =
+  val years = Range(interval.start.getFullYear().toInt, interval.end.getFullYear().toInt + 1)
+  val months = Range(interval.start.getMonth().toInt + 1, interval.end.getMonth().toInt + 2)
+  var data = js.Array[js.Dynamic]()
+  for (year <- years) {
+    for (month <- months) {
+      data = data.concat(loadJson(s"$name/$year" + "%02d".format(month)))
+    }
+  }
+  data
+
+var fileCache = HashMap[String, js.Array[js.Dynamic]]()
+def loadJson(file: String): js.Array[js.Dynamic] = fileCache.getOrElse(file, {
   val xhr = XMLHttpRequest()
-  xhr.open("get", s"data/$name.json", false)
+  xhr.open("get", s"data/$file.json", false) // TODO: this should be async
   xhr.send(null)
-  js.JSON.parse(xhr.responseText).asInstanceOf[js.Array[js.Dynamic]]
+  val result = if (xhr.status == 200)
+    js.JSON.parse(xhr.responseText).asInstanceOf[js.Array[js.Dynamic]]
+    else js.Array()
+  fileCache(file) = result
+  result
+})
 
 def renderPhaseSection(prefix: String, phasesData: js.Array[js.Dynamic])(implicit C: AnnotationContext): HtmlElement = {
   // filter the files in the data by prefix
@@ -99,10 +118,14 @@ def renderMetricsSection(metricsData: js.Array[js.Dynamic])(implicit C: Annotati
   )
 }
 
-def renderPlots(timeFilter: js.Date => Boolean): HtmlElement = {
+def renderPlots(dateInterval: DateInterval): HtmlElement = {
+  val allData = allDataInRange(dateInterval)
+
   given C: AnnotationContext = new AnnotationContext(allData.annotations)
 
-  val preprocessor = new TimePreprocessor(timeFilter)
+  val preprocessor = new TimePreprocessor((date: js.Date) => {
+    date.getTime > dateInterval.start.getTime && date.getTime < dateInterval.end.getTime
+  })
 
   val phasesData = preprocessor.filter(allData.phases)
   val codeSizeData = preprocessor.filter(allData.codeSize)
@@ -164,10 +187,7 @@ val view = {
           startDate.setUTCHours(0, 0, 0, 0)
           endDate.setUTCHours(23, 59, 59, 999)
 
-          val filterFunction = (date: js.Date) => {
-            date.getTime > startDate.getTime && date.getTime < endDate.getTime
-          }
-          renderBus.emit(renderPlots(filterFunction))
+          renderBus.emit(renderPlots(DateInterval(startDate, endDate)))
         }
       )
     ),
