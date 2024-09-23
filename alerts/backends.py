@@ -3,12 +3,15 @@
 import statistics
 import json
 import sys
+import os
 
 N = 20
 SIGMA_MULT = 3
+DIR = "../data/backends/"
 
-with open("../data/backends.json") as f:
-    data = json.load(f)
+files = sorted(os.listdir(DIR))
+data = [json.load(open(f"{DIR}/{f}")) for f in files]
+data = [o for f in files for o in json.load(open(f"{DIR}/{f}"))]
 
 data = data[-(N + 1) :]
 
