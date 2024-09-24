@@ -10,7 +10,6 @@ SIGMA_MULT = 3
 DIR = "../data/backends/"
 
 files = sorted(os.listdir(DIR))
-data = [json.load(open(f"{DIR}/{f}")) for f in files]
 data = [o for f in files for o in json.load(open(f"{DIR}/{f}"))]
 
 data = data[-(N + 1) :]

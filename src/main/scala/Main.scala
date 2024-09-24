@@ -45,13 +45,18 @@ def allDataInRange(interval: DateInterval) = Data(
 )
 
 def loadJsonByDate(interval: DateInterval, name: String): js.Array[js.Dynamic] =
-  val years = Range(interval.start.getFullYear().toInt, interval.end.getFullYear().toInt + 1)
-  val months = Range(interval.start.getMonth().toInt + 1, interval.end.getMonth().toInt + 2)
+  val startYear = interval.start.getFullYear().toInt
+  val endYear = interval.end.getFullYear().toInt
+  val startMonth = interval.start.getMonth().toInt + 1
+  val endMonth = interval.end.getMonth().toInt + 1
+
+  var currentYear = startYear
+  var currentMonth = startMonth
   var data = js.Array[js.Dynamic]()
-  for (year <- years) {
-    for (month <- months) {
-      data = data.concat(loadJson(s"$name/$year" + "%02d".format(month)))
-    }
+  while (currentYear < endYear || (currentYear == endYear && currentMonth <= endMonth)) {
+    data = data.concat(loadJson(s"$name/${currentYear}" + "%02d".format(currentMonth)))
+    currentYear = if (currentMonth == 12) currentYear + 1 else currentYear
+    currentMonth = if (currentMonth < 12) currentMonth + 1 else 1
   }
   data
 
@@ -156,40 +161,48 @@ def renderPlots(dateInterval: DateInterval): HtmlElement = {
   )
 }
 
+def nWeeksBack(weeks: Int) = {
+    val today = new js.Date()
+    today.setHours(-24 * 7 * weeks)
+    today.toISOString().split('T')(0)
+}
+
 val view = {
   val renderBus = new EventBus[HtmlElement]
+  val startDate = Var(nWeeksBack(4)) // default: 1 month
+  val endDate = Var(new js.Date().toISOString().split('T')(0)) // today
 
   div(
     div(
-      idAttr := "control",
+      className := "control",
       input(
-        idAttr := "startDate",
         `type` := "date",
-        value := {
-          val today = new js.Date()
-          today.setHours(-24 * 7 * 4) // last month
-          today.toISOString().split('T')(0)
-        }
+        value <-- startDate
       ),
       "to",
       input(
-        idAttr := "endDate",
         `type` := "date",
-        value := new js.Date().toISOString().split('T')(0) // today
+        value <-- endDate
       ),
       button(
         "generate",
         onClick --> { _ =>
-          val startDate = new js.Date(dom.document.getElementById("startDate").asInstanceOf[HTMLInputElement].value)
-          val endDate = new js.Date(dom.document.getElementById("endDate").asInstanceOf[HTMLInputElement].value)
+          val start = new js.Date(startDate.now())
+          val end = new js.Date(endDate.now())
 
           // set to start and end of day
-          startDate.setUTCHours(0, 0, 0, 0)
-          endDate.setUTCHours(23, 59, 59, 999)
+          start.setUTCHours(0, 0, 0, 0)
+          end.setUTCHours(23, 59, 59, 999)
 
-          renderBus.emit(renderPlots(DateInterval(startDate, endDate)))
+          renderBus.emit(renderPlots(DateInterval(start, end)))
         }
-      )
+      ),
+    ),
+    div(
+      className := "control",
+      button("last year", onClick --> {_ => startDate.set(nWeeksBack(52)) }),
+      button("last month", onClick --> {_ => startDate.set(nWeeksBack(4)) }),
+      button("last week", onClick --> {_ => startDate.set(nWeeksBack(1)) })
     ),
     div(
       idAttr := "main",
