@@ -176,13 +176,15 @@ val view = {
     div(
       className := "control",
       input(
-        `type` := "date",
-        value <-- startDate
+        typ := "date",
+        value <-- startDate,
+        onInput.mapToValue --> startDate
       ),
       "to",
       input(
-        `type` := "date",
-        value <-- endDate
+        typ := "date",
+        value <-- endDate,
+        onInput.mapToValue --> endDate
       ),
       button(
         "generate",
