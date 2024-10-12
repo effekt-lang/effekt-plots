@@ -34,6 +34,8 @@ jobs:
           java-version: 11
           distribution: 'zulu'
           cache: 'sbt'
+      - name: Setup SBT
+        uses: sbt/setup-sbt@v1
       - name: Set up pages
         id: pages
         uses: actions/configure-pages@v3
