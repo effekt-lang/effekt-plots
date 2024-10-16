@@ -41,8 +41,11 @@ def allDataInRange(interval: DateInterval) = Data(
   loadJsonByDate(interval, "metrics"),
   loadJsonByDate(interval, "build"),
   loadJsonByDate(interval, "backends"),
-  loadJson("annotations"),
+  loadJson("annotations.json"),
 )
+
+def fileIndex() =
+  loadJson("index.json").asInstanceOf[js.Array[String]].toSet
 
 def loadJsonByDate(interval: DateInterval, name: String): js.Array[js.Dynamic] =
   val startYear = interval.start.getFullYear().toInt
@@ -54,7 +57,8 @@ def loadJsonByDate(interval: DateInterval, name: String): js.Array[js.Dynamic] =
   var currentMonth = startMonth
   var data = js.Array[js.Dynamic]()
   while (currentYear < endYear || (currentYear == endYear && currentMonth <= endMonth)) {
-    data = data.concat(loadJson(s"$name/${currentYear}" + "%02d".format(currentMonth)))
+    val fileName = s"$name/${currentYear}" + "%02d".format(currentMonth) + ".json"
+    if (fileIndex().contains(fileName)) data = data.concat(loadJson(fileName))
     currentYear = if (currentMonth == 12) currentYear + 1 else currentYear
     currentMonth = if (currentMonth < 12) currentMonth + 1 else 1
   }
@@ -63,7 +67,7 @@ def loadJsonByDate(interval: DateInterval, name: String): js.Array[js.Dynamic] =
 var fileCache = HashMap[String, js.Array[js.Dynamic]]()
 def loadJson(file: String): js.Array[js.Dynamic] = fileCache.getOrElse(file, {
   val xhr = XMLHttpRequest()
-  xhr.open("get", s"data/$file.json", false) // TODO: this should be async
+  xhr.open("get", s"data/$file", false) // TODO: this should be async
   xhr.send(null)
   val result = if (xhr.status == 200)
     js.JSON.parse(xhr.responseText).asInstanceOf[js.Array[js.Dynamic]]
@@ -162,9 +166,9 @@ def renderPlots(dateInterval: DateInterval): HtmlElement = {
 }
 
 def nWeeksBack(weeks: Int) = {
-    val today = new js.Date()
-    today.setHours(-24 * 7 * weeks)
-    today.toISOString().split('T')(0)
+  val today = new js.Date()
+  today.setHours(-24 * 7 * weeks)
+  today.toISOString().split('T')(0)
 }
 
 val view = {
