@@ -4,8 +4,11 @@ import org.scalajs.dom
 import com.raquo.laminar.api.L.{*, given}
 import org.scalajs.dom.XMLHttpRequest
 import org.scalajs.dom.HTMLInputElement
-import scalajs.js
+import scala.concurrent.Future
 import scala.collection.mutable.HashMap
+import dom.ext.Ajax
+import scalajs.concurrent.JSExecutionContext.Implicits.queue
+import scalajs.js
 
 val trackedPhaseDirectories = js.Array(
   "examples/casestudies/",
@@ -34,47 +37,53 @@ case class Data(
   annotations: js.Array[js.Dynamic],
 )
 
-def allDataInRange(interval: DateInterval) = Data(
-  loadJsonByDate(interval, "phases"),
-  loadJsonByDate(interval, "cloc"),
-  loadJsonByDate(interval, "out_loc"),
-  loadJsonByDate(interval, "metrics"),
-  loadJsonByDate(interval, "build"),
-  loadJsonByDate(interval, "backends"),
-  loadJson("annotations.json"),
-)
+def allDataInRange(interval: DateInterval) =
+  val load = loadJsonByDate(interval)
+  for {
+    phases <- load("phases")
+    codeSize <- load("cloc")
+    generatedCodeSize <- load("out_loc")
+    metrics <- load("metrics")
+    buildTime <- load("build")
+    backends <- load("backends")
+    annotations <- loadJson("annotations.json")
+  } yield Data(phases, codeSize, generatedCodeSize, metrics, buildTime, backends, annotations)
 
-def fileIndex() =
-  loadJson("index.json").asInstanceOf[js.Array[String]].toSet
+def fileIndex() = loadJson("index.json").map(_.asInstanceOf[js.Array[String]].toSet)
 
-def loadJsonByDate(interval: DateInterval, name: String): js.Array[js.Dynamic] =
+def loadJsonByDate(interval: DateInterval)(name: String): Future[js.Array[js.Dynamic]] =
   val startYear = interval.start.getFullYear().toInt
   val endYear = interval.end.getFullYear().toInt
   val startMonth = interval.start.getMonth().toInt + 1
   val endMonth = interval.end.getMonth().toInt + 1
 
-  var currentYear = startYear
-  var currentMonth = startMonth
-  var data = js.Array[js.Dynamic]()
-  while (currentYear < endYear || (currentYear == endYear && currentMonth <= endMonth)) {
-    val fileName = s"$name/${currentYear}" + "%02d".format(currentMonth) + ".json"
-    if (fileIndex().contains(fileName)) data = data.concat(loadJson(fileName))
-    currentYear = if (currentMonth == 12) currentYear + 1 else currentYear
-    currentMonth = if (currentMonth < 12) currentMonth + 1 else 1
-  }
-  data
+  def generateMonths(currentYear: Int, currentMonth: Int): List[(Int, Int)] =
+    if (currentYear < endYear || (currentYear == endYear && currentMonth <= endMonth)) {
+      val nextYear = if (currentMonth == 12) currentYear + 1 else currentYear
+      val nextMonth = if (currentMonth < 12) currentMonth + 1 else 1
+      (currentYear, currentMonth) :: generateMonths(nextYear, nextMonth)
+    } else List()
+  
+  val months = generateMonths(startYear, startMonth)
+  Future.sequence {
+    months.map { case (year, month) =>
+      val fileName = s"$name/${year}" + "%02d".format(month) + ".json"
+      fileIndex().flatMap { index =>
+        if (index.contains(fileName)) loadJson(fileName)
+        else Future.successful(js.Array())
+      }
+    }
+  }.map(_.reduce((arr1, arr2) => arr1.concat(arr2)))
 
-var fileCache = HashMap[String, js.Array[js.Dynamic]]()
-def loadJson(file: String): js.Array[js.Dynamic] = fileCache.getOrElse(file, {
-  val xhr = XMLHttpRequest()
-  xhr.open("get", s"data/$file", false) // TODO: this should be async
-  xhr.send(null)
-  val result = if (xhr.status == 200)
-    js.JSON.parse(xhr.responseText).asInstanceOf[js.Array[js.Dynamic]]
-    else js.Array()
-  fileCache(file) = result
-  result
-})
+var fileCache = HashMap[String, Future[js.Array[js.Dynamic]]]()
+def loadJson(file: String): Future[js.Array[js.Dynamic]] = fileCache.synchronized {
+  fileCache.getOrElseUpdate(file, {
+    Ajax.get(s"data/$file").map { xhr =>
+      val result = js.JSON.parse(xhr.responseText).asInstanceOf[js.Array[js.Dynamic]]
+      result
+    }
+  })
+}
 
 def renderPhaseSection(prefix: String, phasesData: js.Array[js.Dynamic])(implicit C: AnnotationContext): HtmlElement = {
   // filter the files in the data by prefix
@@ -127,9 +136,7 @@ def renderMetricsSection(metricsData: js.Array[js.Dynamic])(implicit C: Annotati
   )
 }
 
-def renderPlots(dateInterval: DateInterval): HtmlElement = {
-  val allData = allDataInRange(dateInterval)
-
+def renderPlots(dateInterval: DateInterval): Future[HtmlElement] = allDataInRange(dateInterval).map { allData =>
   given C: AnnotationContext = new AnnotationContext(allData.annotations)
 
   val preprocessor = new TimePreprocessor((date: js.Date) => {
@@ -144,9 +151,8 @@ def renderPlots(dateInterval: DateInterval): HtmlElement = {
   val backendsData = preprocessor.filter(allData.backends)
 
   // too much filtering, nothing left
-  if (phasesData.isEmpty) return sectionTag()
-
-  sectionTag(
+  if (phasesData.isEmpty) sectionTag()
+  else sectionTag(
     h2("Phase times", flexBasis.percent(100)),
     p("The time per phase is extracted using the Effekt `--time json` flag.", flexBasis.percent(100)),
     trackedPhaseDirectories.map { (dir: String) => renderPhaseSection(dir, phasesData) },
@@ -200,7 +206,7 @@ val view = {
           start.setUTCHours(0, 0, 0, 0)
           end.setUTCHours(23, 59, 59, 999)
 
-          renderBus.emit(renderPlots(DateInterval(start, end)))
+          renderPlots(DateInterval(start, end)).map(renderBus.emit)
         }
       ),
     ),
