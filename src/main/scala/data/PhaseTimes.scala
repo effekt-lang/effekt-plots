@@ -31,7 +31,7 @@ class PhaseTimes(d: js.Array[js.Dynamic])(implicit C: AnnotationContext) extends
             // TODO: the property check should be done for all folded data (abstracted to a class?)
             if (p.asInstanceOf[js.Object].hasOwnProperty(key))
               js.Object.entries(p.selectDynamic(key).asInstanceOf[js.Object]).foldLeft(0.0) {
-                  case (acc, js.Tuple2(_, s)) => acc + (s.asInstanceOf[Double] / 1000)
+                case (acc, js.Tuple2(_, s)) => acc + (s.asInstanceOf[Double] / 1000)
               }
             else js.Array()
           }
