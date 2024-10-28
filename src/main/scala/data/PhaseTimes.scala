@@ -33,7 +33,7 @@ class PhaseTimes(d: js.Array[js.Dynamic])(implicit C: AnnotationContext) extends
               js.Object.entries(p.selectDynamic(key).asInstanceOf[js.Object]).foldLeft(0.0) {
                 case (acc, js.Tuple2(_, s)) => acc + (s.asInstanceOf[Double] / 1000)
               }
-            else js.Array()
+            else 0
           }
           backgroundColor = colorScheme.nextColor()
         }
