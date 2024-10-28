@@ -11,7 +11,7 @@ BACKENDS="llvm js"
 
 			while read data; do
 				arr=($data)
-				echo "{\"${arr[0]}\": {\"time\": ${arr[2]}, \"arg\": ${arr[1]}}}"
+				echo "{\"${arr[0]}\": {\"maxMem\": ${arr[3]}, \"time\": ${arr[2]}, \"arg\": ${arr[1]}}}"
 			done <"$log"
 		} | jq -s 'add'
 		echo "}"

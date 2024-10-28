@@ -1,15 +1,17 @@
 package data
 
+// TODO: this should probably be merged with BackendsTime
+
 import plots.LineStacked
 import scala.scalajs.js
 import typings.chartJs.mod.*
 import utils.Color
 import utils.AnnotationContext
 
-class Backends(d: js.Array[js.Dynamic], backend: String)(implicit C: AnnotationContext) extends LineStacked {
-  override def chartTitle: String = s"Execution time for backend $backend"
+class BackendsMemory(d: js.Array[js.Dynamic], backend: String)(implicit C: AnnotationContext) extends LineStacked {
+  override def chartTitle: String = s"Maximum Memory for $backend Backend"
   override def xLabel = "date"
-  override def yLabel = "time in seconds"
+  override def yLabel = "memory usage in kilobyte"
 
   override def tooltipBody(idx: Int) = js.Array(
     f"Commit: ${d(idx).meta.commit}",
@@ -27,7 +29,12 @@ class Backends(d: js.Array[js.Dynamic], backend: String)(implicit C: AnnotationC
       datasets = keys.map { key =>
         new ChartDataSets {
           label = key
-          data = d.map { _.selectDynamic(backend).selectDynamic(key).time.asInstanceOf[Double] / 1e9 }
+          data = d.map { p =>
+            val entry = p.selectDynamic(backend).selectDynamic(key)
+            if (entry.asInstanceOf[js.Object].hasOwnProperty("maxMem"))
+              entry.maxMem.asInstanceOf[Double]
+            else 0
+          }
           backgroundColor = colorScheme.nextColor()
         }
       }

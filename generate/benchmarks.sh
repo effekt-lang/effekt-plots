@@ -8,7 +8,7 @@ FILES="examples/casestudies/*.effekt.md"
 
 # measure build performance first
 for file in $FILES; do
-	"$(which time)" --verbose effekt.sh -o buildout/ -b "$file" >/dev/null 2>"$file".time.out
+	"$(which time)" --verbose effekt.sh -o buildout/ -b "$file" >/dev/null 2>"$file.time.out"
 done
 
 # then build and run all with JSON phase timings
@@ -26,6 +26,7 @@ for backend in $BACKENDS; do
 		arr=($config)
 		file="examples/benchmarks/${arr[0]}.effekt"
 		printf "${arr[0]} ${arr[1]} " >>"$log"
-		effekt.sh --backend "$backend" "$file" -- "${arr[1]}" >>"$log"
+		"$(which time)" --verbose effekt.sh --backend "$backend" "$file" -- "${arr[1]}" 2>&1 |
+			awk 'NR==1{time=$0}; match($0, /.*Maximum resident set size \(kbytes\): ([0-9]+)/, arr){print time, arr[1]}' >>"$log"
 	done <"examples/benchmarks/config_$backend.txt"
 done

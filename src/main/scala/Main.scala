@@ -112,9 +112,10 @@ def renderBackendsSection(prefix: String, backendsData: js.Array[js.Dynamic])(im
 
   sectionTag(
     h3(prefix, flexBasis.percent(100)),
-    Backends(filtered, "llvm").draw(),
-    Backends(filtered, "js").draw(),
-    // BackendDiff(filtered, "js", "llvm").draw(),
+    BackendsTime(filtered, "llvm").draw(),
+    BackendsTime(filtered, "js").draw(),
+    BackendsMemory(filtered, "llvm").draw(),
+    BackendsMemory(filtered, "js").draw(),
   )
 }
 

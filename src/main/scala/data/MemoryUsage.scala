@@ -7,7 +7,7 @@ import utils.Color
 import utils.AnnotationContext
 
 class MemoryUsage(d: js.Array[js.Dynamic])(implicit C: AnnotationContext) extends LineStacked {
-  override def chartTitle: String = "Memory Usage of Programs"
+  override def chartTitle: String = "Maximum Memory while Building"
   override def xLabel = "date"
   override def yLabel = "memory usage in kilobyte"
 
