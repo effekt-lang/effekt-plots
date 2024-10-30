@@ -4,6 +4,7 @@ set -e
 # we need to cd here since some examples import local files
 cd ../effekt/
 
+# selective benchmarks for build and phase timings
 FILES="examples/casestudies/*.effekt.md"
 
 # measure build performance first
@@ -25,8 +26,13 @@ for backend in $BACKENDS; do
 	while read config; do
 		arr=($config)
 		file="examples/benchmarks/${arr[0]}.effekt"
+		outfile="out/$(basename "$file" .effekt)"
 		printf "${arr[0]} ${arr[1]} " >>"$log"
-		"$(which time)" --verbose effekt.sh --backend "$backend" "$file" -- "${arr[1]}" 2>&1 |
+		effekt.sh --backend "$backend" -b "$file"
+
+		# gnutime only measures maximum memory here!
+		# the actual time measurement is already calculated within the benchmarks themself
+		"$(which time)" --verbose ./"$outfile" "${arr[1]}" 2>&1 |
 			awk 'NR==1{time=$0}; match($0, /.*Maximum resident set size \(kbytes\): ([0-9]+)/, arr){print time, arr[1]}' >>"$log"
 	done <"examples/benchmarks/config_$backend.txt"
 done
