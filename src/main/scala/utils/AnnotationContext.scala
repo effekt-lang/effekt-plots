@@ -1,6 +1,7 @@
 package utils
 
 import scalajs.js
+import org.scalajs.dom
 import scala.collection.mutable.Map
 
 case class Annotation(id: Int, date: js.Date, reason: String)
@@ -13,5 +14,5 @@ class AnnotationContext(val _annotations: js.Array[js.Dynamic]) {
         Annotation(annotationCount, new js.Date(annotation.date.asInstanceOf[String]), annotation.reason.asInstanceOf[String])
     }
 
-    val handlers = Map[(Int, Int), js.Function1[js.Dynamic, Unit]]()
+    val handlers = Map[(Int, Int), js.Function1[dom.MouseEvent, Unit]]()
 }

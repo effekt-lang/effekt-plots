@@ -14,6 +14,8 @@ trait Generic(implicit C: AnnotationContext) {
 
   val colorScheme = Color()
 
+  def tooltipBody(idx: Int) = js.Array("")
+
   def drawLine(ctx: dom.CanvasRenderingContext2D, x: Double, y1: Double, y2: Double) = {
     ctx.save()
     ctx.beginPath()
@@ -60,8 +62,8 @@ trait Generic(implicit C: AnnotationContext) {
         // add line click handler
         val canvas = chart.canvas
         val rect = canvas.getBoundingClientRect()
-        val clickHandler: js.Function1[js.Dynamic, Unit] = (event: js.Dynamic) => {
-          val clickX = event.clientX.asInstanceOf[Double] - rect.left
+        val clickHandler: js.Function1[dom.MouseEvent, Unit] = (event: dom.MouseEvent) => {
+          val clickX = event.clientX - rect.left
           if (clickX > x - 10 && clickX < x + 10)
             showAnnotation(annotation.reason)
         }
@@ -76,6 +78,22 @@ trait Generic(implicit C: AnnotationContext) {
       }
     }
   
+  // additional click handler to open prompt for copying commit information etc.
+  // again, we need to use a lot of hidden APIs to do this...
+  def clickHandler(event: js.UndefOr[dom.MouseEvent], activeElementsOpt: js.UndefOr[js.Array[js.Object]]) = {
+    if (activeElementsOpt.isDefined && !activeElementsOpt.get.isEmpty) {
+      val chart = activeElementsOpt.get(0).asInstanceOf[js.Dynamic]._chart.asInstanceOf[Chart]
+      val clickedElements = chart.getElementAtEvent(event)
+      if (clickedElements.length == 1) { // single tooltip clicked
+        val index = clickedElements(0).asInstanceOf[js.Dynamic]._index.asInstanceOf[Int]
+        dom.window.prompt("Selected event:", tooltipBody(index).join(", "))
+      }
+
+      // do not activate the annotation popup
+      event.get.stopImmediatePropagation()
+    }
+  }
+
   def drawPlot(legend: HtmlElement, chartConfig: ChartConfiguration): HtmlElement =
     var optChart: Option[Chart] = None
     canvasTag(
