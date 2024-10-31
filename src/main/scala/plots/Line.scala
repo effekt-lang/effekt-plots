@@ -13,8 +13,6 @@ trait Line extends Generic {
   def xLabel = "x axis"
   def yLabel = "y axis"
 
-  def tooltipBody(idx: Int) = js.Array("")
-
   val chartConfigOpt = chartDataOpt.map { chartData => new ChartConfiguration {
     `type` = ChartType.line
     data = chartData
@@ -64,6 +62,7 @@ trait Line extends Generic {
             }
           }
         )
+        onClick = clickHandler
       }
     }
   }}
