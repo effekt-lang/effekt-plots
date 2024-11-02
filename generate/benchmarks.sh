@@ -18,6 +18,7 @@ for file in $FILES; do
 done
 
 # now also measure execution time of backends based on benchmark configuration
+RUNS=5
 BACKENDS="llvm js"
 
 for backend in $BACKENDS; do
@@ -28,11 +29,23 @@ for backend in $BACKENDS; do
 		file="examples/benchmarks/${arr[0]}.effekt"
 		outfile="out/$(basename "$file" .effekt)"
 		printf "${arr[0]} ${arr[1]} " >>"$log"
+
 		effekt.sh --backend "$backend" -b "$file"
 
-		# gnutime only measures maximum memory here!
-		# the actual time measurement is already calculated within the benchmarks themself
-		"$(which time)" --verbose ./"$outfile" "${arr[1]}" 2>&1 |
-			awk 'NR==1{time=$0}; match($0, /.*Maximum resident set size \(kbytes\): ([0-9]+)/, arr){print time, arr[1]}' >>"$log"
+		total_time=0
+		total_mem=0
+		for run in $(seq $RUNS); do
+			# gnutime only measures maximum memory here!
+			# the actual time measurement is already calculated within the benchmarks themself
+			read -r time mem <<<$("$(which time)" --verbose ./"$outfile" "${arr[1]}" 2>&1 |
+				awk 'NR==1{time=$0}; match($0, /.*Maximum resident set size \(kbytes\): ([0-9]+)/, arr){print time, arr[1]}')
+
+			total_time=$((total_time + time))
+			total_mem=$((total_mem + mem))
+		done
+
+		average_time=$((total_time / RUNS))
+		average_mem=$((total_mem / RUNS))
+		echo "$average_time $average_mem" >>"$log"
 	done <"examples/benchmarks/config_$backend.txt"
 done
