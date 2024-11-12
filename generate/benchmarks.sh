@@ -33,6 +33,6 @@ for backend in $BACKENDS; do
 		# gnutime only measures maximum memory here!
 		# the actual time measurement is already calculated within the benchmarks themself
 		"$(which time)" --verbose ./"$outfile" "${arr[1]}" 2>&1 |
-			awk 'NR==1{time=$0}; match($0, /.*Maximum resident set size \(kbytes\): ([0-9]+)/, arr){print time, arr[1]}' >>"$log"
+			gawk 'NR==1{time=$0}; match($0, /.*Maximum resident set size \(kbytes\): ([0-9]+)/, arr){print time, arr[1]}' >>"$log"
 	done <"examples/benchmarks/config_$backend.txt"
 done

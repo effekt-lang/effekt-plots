@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   sync:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -59,12 +59,7 @@ jobs:
       - name: Install generator dependencies
         run: |
           sudo apt update
-          sudo apt install jq cloc python3
-
-      - name: Print system information
-        run: |
-          sudo apt install inxi
-          inxi -Fxz
+          sudo apt install jq cloc python3 git time llvm gawk
 
       - name: Generate data
         run: |
