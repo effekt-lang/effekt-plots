@@ -58,8 +58,8 @@ jobs:
 
       - name: Install generator dependencies
         run: |
-          sudo apt update
-          sudo apt install jq cloc python3 git time llvm gawk
+          sudo apt -y update
+          sudo apt -y install jq cloc python3 git time llvm gawk
 
       - name: Generate data
         run: |
