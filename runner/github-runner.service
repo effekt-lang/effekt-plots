@@ -1,0 +1,18 @@
+[Unit]
+Description=GitHub Runner Container
+After=docker.service
+Requires=docker.service
+[Service]
+TimeoutStartSec=0
+Restart=always
+ExecStartPre=-/usr/bin/docker stop %N
+ExecStartPre=-/usr/bin/docker rm %N
+ExecStartPre=-/usr/bin/docker pull myoung34/github-runner:ubuntu-noble
+ExecStart=/usr/bin/docker run --rm \
+                              --env-file /etc/github-runner.env \
+                              -e RUNNER_NAME=%H \
+                              -v /var/run/docker.sock:/var/run/docker.sock \
+                              --name %N \
+                              myoung34/github-runner:ubuntu-noble
+[Install]
+WantedBy=multi-user.target

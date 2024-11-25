@@ -38,7 +38,7 @@ for backend in $BACKENDS; do
 			# gnutime only measures maximum memory here!
 			# the actual time measurement is already calculated within the benchmarks themself
 			read -r time mem <<<$("$(which time)" --verbose ./"$outfile" "${arr[1]}" 2>&1 |
-				awk 'NR==1{time=$0}; match($0, /.*Maximum resident set size \(kbytes\): ([0-9]+)/, arr){print time, arr[1]}')
+				gawk 'NR==1{time=$0}; match($0, /.*Maximum resident set size \(kbytes\): ([0-9]+)/, arr){print time, arr[1]}')
 
 			total_time=$((total_time + time))
 			total_mem=$((total_mem + mem))
