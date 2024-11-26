@@ -110,12 +110,27 @@ def renderBackendsSection(prefix: String, backendsData: js.Array[js.Dynamic])(im
   val preprocessor = SubstitutionPreprocessor(_.startsWith(prefix + "/"), _.replace(prefix + "/", ""))
   val filtered = preprocessor.filter(backendsData)
 
-  sectionTag(
-    h3(prefix, flexBasis.percent(100)),
+  lazy val normalized = sectionTag(
     BackendsTime(filtered, "llvm").draw(),
     BackendsTime(filtered, "js").draw(),
     BackendsMemory(filtered, "llvm").draw(),
     BackendsMemory(filtered, "js").draw(),
+  )
+
+  lazy val default = sectionTag(
+    BackendsTime(filtered, "llvm_default").draw(),
+    BackendsTime(filtered, "js_default").draw(),
+    BackendsMemory(filtered, "llvm_default").draw(),
+    BackendsMemory(filtered, "js_default").draw(),
+  )
+
+  val toggle = Var(false)
+  sectionTag(
+    h3(prefix, flexBasis.percent(100)),
+    button("toggle", onClick --> {_ =>
+      toggle.update(b => !b)
+    }),
+    child <-- toggle.signal.map(if _ then normalized else default)
   )
 }
 

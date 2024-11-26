@@ -21,14 +21,18 @@ done
 RUNS=5
 BACKENDS="llvm js"
 
-for backend in $BACKENDS; do
-	log="benchmarks_$backend.log"
+benchmark() {
+	backend=$1
+	config=$2
+
+	log="benchmarks_${backend}_${config}.log"
 	>"$log"
 	while read config; do
 		arr=($config)
-		file="examples/benchmarks/${arr[0]}.effekt"
+		filename=${arr[0]%.*} # TODO: _default adds .effekt! TODO
+		file="examples/benchmarks/$filename.effekt"
 		outfile="out/$(basename "$file" .effekt)"
-		printf "${arr[0]} ${arr[1]} " >>"$log"
+		printf "$filename ${arr[1]} " >>"$log"
 
 		effekt.sh --backend "$backend" -b "$file"
 
@@ -47,5 +51,15 @@ for backend in $BACKENDS; do
 		average_time=$((total_time / RUNS))
 		average_mem=$((total_mem / RUNS))
 		echo "$average_time $average_mem" >>"$log"
-	done <"examples/benchmarks/config_$backend.txt"
+	done <"examples/benchmarks/config_$config.txt"
+}
+
+# run benchmarks for all backends
+for backend in $BACKENDS; do
+	benchmark "$backend" "$backend"
+done
+
+# now do the same with default arguments
+for backend in $BACKENDS; do
+	benchmark "$backend" "default"
 done
