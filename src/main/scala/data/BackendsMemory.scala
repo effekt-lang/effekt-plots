@@ -21,8 +21,11 @@ class BackendsMemory(d: js.Array[js.Dynamic], backend: String)(implicit C: Annot
   def chartDataOpt = {
     if (d.isEmpty) return None
 
-    val keys = js.Object.keys(d(0).selectDynamic(backend).asInstanceOf[js.Object])
-      .filter { k => k != "meta" && k != "total" }
+    // TODO: We should really use actual structs / JSON
+    val main = d.asInstanceOf[js.Array[js.Object]].find(_.hasOwnProperty(backend))
+    if (main.isEmpty) return None
+
+    val keys = js.Object.keys(main.get.asInstanceOf[js.Dynamic].selectDynamic(backend).asInstanceOf[js.Object])
 
     Some(new ChartData {
       labels = d.map { e => new js.Date(e.meta.currentDate.asInstanceOf[String].toDouble * 1000) }
@@ -30,9 +33,12 @@ class BackendsMemory(d: js.Array[js.Dynamic], backend: String)(implicit C: Annot
         new ChartDataSets {
           label = key
           data = d.map { p =>
-            val entry = p.selectDynamic(backend).selectDynamic(key)
-            if (entry.asInstanceOf[js.Object].hasOwnProperty("maxMem"))
-              entry.maxMem.asInstanceOf[Double]
+            if (p.asInstanceOf[js.Object].hasOwnProperty(backend)) {
+              val entry = p.selectDynamic(backend).selectDynamic(key)
+              if (entry.asInstanceOf[js.Object].hasOwnProperty("maxMem"))
+                entry.maxMem.asInstanceOf[Double] / 1e9
+              else 0
+            }
             else 0
           }
           backgroundColor = colorScheme.nextColor()
