@@ -1,6 +1,5 @@
 #!/bin/env bash
 set -e
-set -x
 
 ./build.sh | ./append.sh build
 
