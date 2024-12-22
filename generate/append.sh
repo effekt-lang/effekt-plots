@@ -2,6 +2,8 @@
 set -e
 
 >&2 echo "$0"
+>&2 cat <&0
+exit 1
 
 DATA=../data
 
