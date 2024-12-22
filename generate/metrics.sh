@@ -1,5 +1,6 @@
 #!/bin/env bash
 set -e
+set -x
 
 combineMetrics() {
 	TIMEFILE="$1"

@@ -1,5 +1,6 @@
 #!/bin/env bash
 set -e
+set -x
 
 # NOTE: this depends on built llvm/js benchmarks (e.g. by running `./benchmarks.sh`)
 

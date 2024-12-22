@@ -1,5 +1,6 @@
 #!/bin/env bash
 set -e
+set -x
 
 cd ../effekt/
 git submodule update --init --recursive

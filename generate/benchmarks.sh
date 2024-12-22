@@ -1,5 +1,6 @@
 #!/bin/env bash
 set -e
+set -x
 
 # we need to cd here since some examples import local files
 cd ../effekt/
