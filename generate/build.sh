@@ -4,7 +4,7 @@ set -e
 >&2 echo "$0"
 
 cd ../effekt/
-git submodule update --init --recursive
+git submodule update --init --recursive &>/dev/null
 
 time=$({ $(which time) -f '%e' bash -c "sbt install &>/dev/null"; } 2>&1 | tail -n1)
 jq -n \
