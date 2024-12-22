@@ -1,6 +1,8 @@
 #!/bin/env bash
 set -e
 
+>&2 echo "$0"
+
 cd ../effekt/
 git submodule update --init --recursive
 

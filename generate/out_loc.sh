@@ -1,6 +1,8 @@
 #!/bin/env bash
 set -e
 
+>&2 echo "$0"
+
 # NOTE: this depends on built llvm/js benchmarks (e.g. by running `./benchmarks.sh`)
 
 cd ../effekt/out/
