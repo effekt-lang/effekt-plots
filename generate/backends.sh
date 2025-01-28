@@ -9,6 +9,8 @@ merge() {
 
 	if [ "$config" = "default" ]; then
 		name="${backend}_default"
+	elif [ "$config" = "reference" ]; then
+		name="${backend}_reference"
 	else
 		name=$backend
 	fi
@@ -35,4 +37,7 @@ merge() {
 	for backend in $BACKENDS; do
 		merge "$backend" "default"
 	done
+
+	# and reference benchmarks (only JS for now)
+	merge "js" "reference"
 } | jq -s 'add'

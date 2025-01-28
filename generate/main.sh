@@ -4,6 +4,8 @@ set -e
 ./build.sh | ./append.sh build
 
 ./benchmarks.sh
+./reference/are-we-fast-yet.sh
+
 ./cloc.sh | ./append.sh cloc
 ./out_loc.sh | ./append.sh out_loc
 ./phases.sh | ./append.sh phases
