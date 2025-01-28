@@ -18,7 +18,8 @@ val trackedPhaseDirectories = js.Array(
 val trackedBenchmarks = js.Array(
   "are_we_fast_yet",
   "duality_of_compilation",
-  "effect_handlers_bench"
+  "effect_handlers_bench",
+  "input_output"
 )
 
 val trackedIndividualBuild = js.Array(

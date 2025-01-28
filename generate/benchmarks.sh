@@ -1,6 +1,8 @@
 #!/bin/env bash
 set -e
 
+>&2 echo "$0"
+
 # we need to cd here since some examples import local files
 cd ../effekt/
 

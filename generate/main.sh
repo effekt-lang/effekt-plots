@@ -1,6 +1,8 @@
 #!/bin/env bash
 set -e
 
+>&2 echo "$0"
+
 ./build.sh | ./append.sh build
 
 ./benchmarks.sh
