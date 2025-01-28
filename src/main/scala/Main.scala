@@ -124,13 +124,22 @@ def renderBackendsSection(prefix: String, backendsData: js.Array[js.Dynamic])(im
     BackendsMemory(filtered, "js_default").draw(),
   )
 
-  val toggle = Var(false)
+  lazy val reference = sectionTag(
+    BackendsTime(filtered, "js_reference").draw(),
+    BackendsMemory(filtered, "js_reference").draw(),
+  )
+
+  val toggle = Var(0)
   sectionTag(
     h3(prefix, flexBasis.percent(100)),
-    button("toggle", onClick --> {_ =>
-      toggle.update(b => !b)
+    button("Other arguments", onClick --> {_ =>
+      toggle.update(b => (b + 1) % 3)
     }),
-    child <-- toggle.signal.map(if _ then normalized else default)
+    child <-- toggle.signal.map {
+      case 0 => normalized
+      case 1 => default
+      case 2 => reference
+    }
   )
 }
 
