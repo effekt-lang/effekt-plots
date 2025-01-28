@@ -23,7 +23,7 @@ for benchmark in $TRACKED; do
 			gawk 'NR==6{time=split($0, arr1, " ")}; match($0, /.*Maximum resident set size \(kbytes\): ([0-9]+)/, arr2){print arr1[3], arr2[1]}')
 
 		time=${time::-2} # remove us suffix
-		total_time=$((total_time + time))
+		total_time=$((total_time + time * 1000))
 		total_mem=$((total_mem + mem))
 	done
 
