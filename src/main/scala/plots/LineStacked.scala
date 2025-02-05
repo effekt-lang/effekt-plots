@@ -12,9 +12,19 @@ trait LineStacked extends Generic {
   def xLabel = "x axis"
   def yLabel = "y axis"
 
+  def normalize(data: ChartData) = {
+    val dat = data.datasets
+    val multipliers: js.Array[Double] = dat.get.map { el => 1.0 / el.data.get(0).get.asInstanceOf[Double] }
+    data.datasets = dat.get.zip(multipliers).map { case (el, multiplier) =>
+      el.data = el.data.get.map { d => multiplier * d.get.asInstanceOf[Double] }
+      el
+    }
+    data
+  }
+
   val chartConfigOpt = chartDataOpt.map { chartData => new ChartConfiguration {
     `type` = ChartType.line
-    data = chartData
+    data = if (normalizeData) normalize(chartData) else chartData
     options = new ChartOptions {
       responsive = true
       maintainAspectRatio = false
@@ -46,7 +56,7 @@ trait LineStacked extends Generic {
             stacked = true
             scaleLabel = new ScaleTitleOptions {
               display = true
-              labelString = xLabel
+              labelString = if (normalizeData) xLabel ++ " (normalized to 1)" else xLabel
             }
           }
         )
@@ -59,7 +69,7 @@ trait LineStacked extends Generic {
             stacked = true
             scaleLabel = new ScaleTitleOptions {
               display = true
-              labelString = yLabel
+              labelString = if (normalizeData) yLabel ++ " (normalized to 1)" else yLabel
             }
           }
         )

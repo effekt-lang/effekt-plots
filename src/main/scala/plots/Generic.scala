@@ -16,6 +16,9 @@ trait Generic(implicit C: AnnotationContext) {
 
   def tooltipBody(idx: Int) = js.Array("")
 
+  // TODO: This should probably be somewhere else
+  def normalizeData = C.normalized
+
   def drawLine(ctx: dom.CanvasRenderingContext2D, x: Double, y1: Double, y2: Double) = {
     ctx.save()
     ctx.beginPath()

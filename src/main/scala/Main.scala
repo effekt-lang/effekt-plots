@@ -162,8 +162,8 @@ def renderMetricsSection(metricsData: js.Array[js.Dynamic])(implicit C: Annotati
   )
 }
 
-def renderPlots(dateInterval: DateInterval): Future[HtmlElement] = allDataInRange(dateInterval).map { allData =>
-  given C: AnnotationContext = new AnnotationContext(allData.annotations)
+def renderPlots(normalize: Boolean, dateInterval: DateInterval): Future[HtmlElement] = allDataInRange(dateInterval).map { allData =>
+  given C: AnnotationContext = new AnnotationContext(normalize, allData.annotations)
 
   val preprocessor = new TimePreprocessor((date: js.Date) => {
     date.getTime > dateInterval.start.getTime && date.getTime < dateInterval.end.getTime
@@ -208,6 +208,11 @@ val view = {
   val startDate = Var(nWeeksBack(4)) // default: 1 month
   val endDate = Var(new js.Date().toISOString().split('T')(0)) // today
 
+  val startTime = Var("12:00am") // 12am
+  val endTime = Var("11:59pm") // 11:59pm
+
+  val normalize = Var(false)
+
   div(
     div(
       className := "control",
@@ -222,22 +227,38 @@ val view = {
         value <-- endDate,
         onInput.mapToValue --> endDate
       ),
+      br(),
+      input(
+        typ := "time",
+        value <-- startTime,
+        onInput.mapToValue --> startTime
+      ),
+      "to",
+      input(
+        typ := "time",
+        value <-- endTime,
+        onInput.mapToValue --> endTime
+      ),
       button(
         "generate",
         onClick --> { _ =>
-          val start = new js.Date(startDate.now())
-          val end = new js.Date(endDate.now())
+          val rangeStart = new js.Date(startDate.now())
+          val rangeEnd = new js.Date(endDate.now())
+
+          val hoursStart = new js.Date(startTime.now())
+          val hoursEnd = new js.Date(endTime.now())
 
           // set to start and end of day
-          start.setUTCHours(0, 0, 0, 0)
-          end.setUTCHours(23, 59, 59, 999)
+          rangeStart.setUTCHours(0, 0, 0, 0)
+          rangeEnd.setUTCHours(23, 59, 59, 999)
 
-          renderPlots(DateInterval(start, end)).map(renderBus.emit)
+          renderPlots(normalize.now(), DateInterval(rangeStart, rangeEnd)).map(renderBus.emit)
         }
       ),
     ),
     div(
       className := "control",
+      button("toggle normalization", onClick --> {_ => normalize.update(!_) }),
       button("last year", onClick --> {_ => startDate.set(nWeeksBack(52)) }),
       button("last month", onClick --> {_ => startDate.set(nWeeksBack(4)) }),
       button("last week", onClick --> {_ => startDate.set(nWeeksBack(1)) })
