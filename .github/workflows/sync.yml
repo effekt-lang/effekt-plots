@@ -7,7 +7,7 @@ on:
         description: "Commit SHA of Effekt submodule to checkout and build. If omitted, the latest commit is chosen. (OPTIONAL)"
         required: false
   schedule:
-    - cron:  '0 */12 * * *'
+    - cron:  '0 10/12 * * *'
 
 permissions:
   contents: write
