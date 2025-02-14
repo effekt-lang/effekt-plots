@@ -7,19 +7,10 @@ BACKENDS="llvm js"
 
 merge() {
 	backend=$1
-	config=$2
 
-	if [ "$config" = "default" ]; then
-		name="${backend}_default"
-	elif [ "$config" = "reference" ]; then
-		name="${backend}_reference"
-	else
-		name=$backend
-	fi
-
-	echo "{\"$name\":"
+	echo "{\"$backend\":"
 	{
-		log="../effekt/benchmarks_${backend}_${config}.log"
+		log="../effekt/benchmarks_${backend}.log"
 
 		while read data; do
 			arr=($data)
@@ -32,12 +23,7 @@ merge() {
 {
 	# merge benchmark data for all backends
 	for backend in $BACKENDS; do
-		merge "$backend" "$backend"
-	done
-
-	# now do the same for default arguments
-	for backend in $BACKENDS; do
-		merge "$backend" "default"
+		merge "$backend"
 	done
 
 	# and reference benchmarks (only JS for now)
