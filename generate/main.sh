@@ -4,9 +4,8 @@ set -e
 >&2 echo "$0"
 
 ./build.sh | ./append.sh build
-
+./reference.sh | ./append.sh reference
 ./benchmarks.sh
-./reference/are-we-fast-yet.sh
 
 ./cloc.sh | ./append.sh cloc
 ./out_loc.sh | ./append.sh out_loc

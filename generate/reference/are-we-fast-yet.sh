@@ -1,7 +1,7 @@
 #!/bin/env bash
 set -e
 
-# TODO: we could supply a outer and inner loop iteration count to harness.*
+>&2 echo "$0"
 
 # are-we-fast-yet uses different filenames than we do!
 TRACKED="Bounce List Mandelbrot NBody Permute Queens Sieve Storage Towers"
@@ -10,13 +10,20 @@ PREFIX="are_we_fast_yet"
 
 ARR_RENAMED=($RENAMED)
 
+# TODO: Should we somehow sync the arguments here?
+# TODO: we could supply a outer and inner loop iteration count to harness.*
+CONFIG_FILE="../../../../../effekt/examples/benchmarks/config_default.txt"
+
 # Hyperfine can only write JSON to files
 tmpfile=$(mktemp /tmp/hyperfine_are-we-fast-yet.XXXXX)
 
 # command -> json
 benchmark() {
-	hyperfine --export-json "$tmpfile" "$1" &>/dev/null
-	jq "{mean: .results[0].mean, stddev: .results[0].stddev}" "$tmpfile"
+	if hyperfine --export-json "$tmpfile" "$1" &>/dev/null; then
+		jq "{mean: .results[0].mean, stddev: .results[0].stddev, arg: 0}" "$tmpfile"
+	else
+		echo "{\"arg\": 0}"
+	fi
 }
 
 # output start
