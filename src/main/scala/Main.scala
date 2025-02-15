@@ -10,6 +10,8 @@ import dom.ext.Ajax
 import scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scalajs.js
 
+import org.scalajs.dom
+
 val trackedPhaseDirectories = js.Array(
   "examples/casestudies/",
   // "/home/runner/work/effekt-plots/effekt-plots/effekt/libraries/",
@@ -35,7 +37,9 @@ case class Data(
   metrics: js.Array[js.Dynamic],
   buildTime: js.Array[js.Dynamic],
   backends: js.Array[js.Dynamic],
+  backendReference: js.Array[js.Dynamic],
   annotations: js.Array[js.Dynamic],
+  reference: js.Array[js.Dynamic],
 )
 
 def allDataInRange(interval: DateInterval) =
@@ -47,8 +51,10 @@ def allDataInRange(interval: DateInterval) =
     metrics <- load("metrics")
     buildTime <- load("build")
     backends <- load("backends")
+    backendReference <- load("reference")
     annotations <- loadJson("annotations.json")
-  } yield Data(phases, codeSize, generatedCodeSize, metrics, buildTime, backends, annotations)
+    reference <- loadJson("reference.json")
+  } yield Data(phases, codeSize, generatedCodeSize, metrics, buildTime, backends, backendReference, annotations, reference)
 
 def fileIndex() = loadJson("index.json").map(_.asInstanceOf[js.Array[String]].toSet)
 
@@ -111,36 +117,12 @@ def renderBackendsSection(prefix: String, backendsData: js.Array[js.Dynamic])(im
   val preprocessor = SubstitutionPreprocessor(_.startsWith(prefix + "/"), _.replace(prefix + "/", ""))
   val filtered = preprocessor.filter(backendsData)
 
-  lazy val normalized = sectionTag(
+  sectionTag(
+    h3(prefix, flexBasis.percent(100)),
     BackendsTime(filtered, "llvm").draw(),
     BackendsTime(filtered, "js").draw(),
     BackendsMemory(filtered, "llvm").draw(),
     BackendsMemory(filtered, "js").draw(),
-  )
-
-  lazy val default = sectionTag(
-    BackendsTime(filtered, "llvm_default").draw(),
-    BackendsTime(filtered, "js_default").draw(),
-    BackendsMemory(filtered, "llvm_default").draw(),
-    BackendsMemory(filtered, "js_default").draw(),
-  )
-
-  lazy val reference = sectionTag(
-    BackendsTime(filtered, "js_reference").draw(),
-    BackendsMemory(filtered, "js_reference").draw(),
-  )
-
-  val toggle = Var(0)
-  sectionTag(
-    h3(prefix, flexBasis.percent(100)),
-    button("Other arguments", onClick --> {_ =>
-      toggle.update(b => (b + 1) % 3)
-    }),
-    child <-- toggle.signal.map {
-      case 0 => normalized
-      case 1 => default
-      case 2 => reference
-    }
   )
 }
 
@@ -162,6 +144,20 @@ def renderMetricsSection(metricsData: js.Array[js.Dynamic])(implicit C: Annotati
   )
 }
 
+def renderReferenceSection(referenceData: js.Array[js.Dynamic], backendReference: js.Array[js.Dynamic])(implicit C: AnnotationContext): HtmlElement = {
+  val latest = backendReference.last // TODO: make sure that the data is sorted
+  val merged = js.Object.assign(js.Object(), latest.asInstanceOf[js.Object], referenceData.asInstanceOf[js.Object])
+
+  val languages = js.Object.keys(merged)
+  val benchmarks = languages.flatMap(key => js.Object.keys(merged.asInstanceOf[js.Dynamic].selectDynamic(key).asInstanceOf[js.Object])).distinct
+
+  sectionTag(
+    benchmarks.map { benchmark =>
+      Reference(benchmark, merged.asInstanceOf[js.Dynamic]).draw()
+    }
+  )
+}
+
 def renderPlots(normalize: Boolean, dateInterval: DateInterval): Future[HtmlElement] = allDataInRange(dateInterval).map { allData =>
   given C: AnnotationContext = new AnnotationContext(normalize, allData.annotations)
 
@@ -175,19 +171,22 @@ def renderPlots(normalize: Boolean, dateInterval: DateInterval): Future[HtmlElem
   val buildTimeData = preprocessor.filter(allData.buildTime)
   val metricsData = preprocessor.filter(allData.metrics)
   val backendsData = preprocessor.filter(allData.backends)
+  val backendReferenceData = preprocessor.filter(allData.backendReference)
 
   // too much filtering, nothing left
   if (phasesData.isEmpty) sectionTag()
   else sectionTag(
-    h2("Phase times", flexBasis.percent(100)),
+    h2("Build Performance", flexBasis.percent(100)),
     p("The time per phase is extracted using the Effekt `--time json` flag.", flexBasis.percent(100)),
     trackedPhaseDirectories.map { (dir: String) => renderPhaseSection(dir, phasesData) },
-    h2("Backend benchmarks", flexBasis.percent(100)),
+    h2("Performance over Time", flexBasis.percent(100)),
     trackedBenchmarks.map { (benchmarks: String) => renderBackendsSection(benchmarks, backendsData) },
-    h2("Build metrics", flexBasis.percent(100)),
+    h2("Relative Performance", flexBasis.percent(100)),
+    renderReferenceSection(allData.reference, backendReferenceData),
+    h2("Compiler Build Performance", flexBasis.percent(100)),
     p("The metrics are gathered by measuring `effekt -b <file>` using `gnutime`. Therefore, these metrics include the overhead of JVM.", flexBasis.percent(100)),
     renderMetricsSection(metricsData),
-    h2("General metrics", flexBasis.percent(100)),
+    h2("General Metrics", flexBasis.percent(100)),
     sectionTag(
       GeneratedCodeSize(generatedCodeSizeData, "llvm").draw(),
       GeneratedCodeSize(generatedCodeSizeData, "js").draw(),
@@ -208,9 +207,6 @@ val view = {
   val startDate = Var(nWeeksBack(4)) // default: 1 month
   val endDate = Var(new js.Date().toISOString().split('T')(0)) // today
 
-  val startTime = Var("12:00am") // 12am
-  val endTime = Var("11:59pm") // 11:59pm
-
   val normalize = Var(false)
 
   div(
@@ -227,26 +223,11 @@ val view = {
         value <-- endDate,
         onInput.mapToValue --> endDate
       ),
-      br(),
-      input(
-        typ := "time",
-        value <-- startTime,
-        onInput.mapToValue --> startTime
-      ),
-      "to",
-      input(
-        typ := "time",
-        value <-- endTime,
-        onInput.mapToValue --> endTime
-      ),
       button(
         "generate",
         onClick --> { _ =>
           val rangeStart = new js.Date(startDate.now())
           val rangeEnd = new js.Date(endDate.now())
-
-          val hoursStart = new js.Date(startTime.now())
-          val hoursEnd = new js.Date(endTime.now())
 
           // set to start and end of day
           rangeStart.setUTCHours(0, 0, 0, 0)

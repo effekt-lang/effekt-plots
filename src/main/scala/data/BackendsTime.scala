@@ -8,6 +8,8 @@ import typings.chartJs.mod.*
 import utils.Color
 import utils.AnnotationContext
 
+import org.scalajs.dom
+
 class BackendsTime(d: js.Array[js.Dynamic], backend: String)(implicit C: AnnotationContext) extends LineStacked {
   override def chartTitle: String = s"Execution Time for $backend Backend"
   override def xLabel = "date"
