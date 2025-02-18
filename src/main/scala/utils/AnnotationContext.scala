@@ -6,7 +6,7 @@ import scala.collection.mutable.Map
 
 case class Annotation(id: Int, date: js.Date, reason: String)
 
-class AnnotationContext(val _annotations: js.Array[js.Dynamic]) {
+class AnnotationContext(val normalized: Boolean, val _annotations: js.Array[js.Dynamic]) {
     var annotationCount = 0
 
     val annotations: js.Array[Annotation] = _annotations.map { annotation =>
