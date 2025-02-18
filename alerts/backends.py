@@ -34,6 +34,9 @@ outliers = []
 for backend in backends:
     for file in merged[backend]:
         runs = merged[backend][file][:-1]
+        if len(runs) < 5:
+            continue
+
         mean = statistics.mean(runs)
         sd = statistics.stdev(runs)
 
