@@ -153,7 +153,7 @@ def renderReferenceSection(referenceData: js.Array[js.Dynamic], backendReference
 
   sectionTag(
     benchmarks.map { benchmark =>
-      Reference(benchmark, merged.asInstanceOf[js.Dynamic]).draw()
+      Reference(benchmark, merged).draw()
     }
   )
 }

@@ -13,6 +13,9 @@ trait Bar extends Generic {
   def xLabel = "x axis"
   def yLabel = "y axis"
 
+  // Annotations are not supported in Bar charts since they are categorical, not time-based
+  override def annotationPlugin(chart: Chart, easing: Easing, options: js.UndefOr[Any]): Unit = ()
+
   val chartConfigOpt = chartDataOpt.map { chartData => new ChartConfiguration {
     `type` = ChartType.bar
     data = chartData
@@ -36,14 +39,8 @@ trait Bar extends Generic {
       scales = new ChartScales {
         xAxes = js.Array(
           new ChartXAxe {
-            `type` = "time"
+            `type` = "category"
             distribution = typings.chartJs.chartJsStrings.series
-            time = new TimeScale {
-              unit = TimeUnit.hour
-              displayFormats = new TimeDisplayFormat {
-                hour = "hA, D.M."
-              }
-            }
             scaleLabel = new ScaleTitleOptions {
               display = true
               labelString = xLabel
