@@ -9,15 +9,15 @@ cd ../effekt/
 # selective benchmarks for build and phase timings
 FILES="examples/casestudies/*.effekt.md"
 
-# # measure build performance first
-# for file in $FILES; do
-# 	"$(which time)" --verbose effekt.sh -o buildout/ -b "$file" >/dev/null 2>"$file.time.out"
-# done
-#
-# # then build and run all with JSON phase timings
-# for file in $FILES; do
-# 	effekt.sh -o out/ --time json "$file" &>/dev/null
-# done
+# measure build performance first
+for file in $FILES; do
+	"$(which time)" --verbose effekt.sh -o buildout/ -b "$file" >/dev/null 2>"$file.time.out"
+done
+
+# then build and run all with JSON phase timings
+for file in $FILES; do
+	effekt.sh -o out/ --time json "$file" &>/dev/null
+done
 
 # now also measure execution time of backends based on benchmark configuration
 RUNS=5

@@ -5,6 +5,7 @@ set -e
 
 # generate reference data per request
 if [ "$1" = "sync" ]; then
+	rm -f ../data/reference.json
 	{
 		./reference/are-we-fast-yet.sh
 		./reference/duality-of-compilation.sh

@@ -63,6 +63,25 @@ i=0
 
 echo ","
 
+# --- Java benchmarks ---
+
+cd ../Java
+
+./build.sh &>/dev/null
+
+echo "\"java\":"
+i=0
+{
+	for benchmark in $TRACKED; do
+		echo "{\"$PREFIX/${ARR_RENAMED[$i]}\":"
+		benchmark "java -cp benchmarks.jar Harness $benchmark 1"
+		echo "}"
+		i=$((i + 1))
+	done
+} | jq -s 'add'
+
+echo ","
+
 # --- C++ benchmarks ---
 
 cd ../C++

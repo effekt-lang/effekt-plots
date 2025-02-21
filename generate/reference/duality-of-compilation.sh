@@ -67,6 +67,25 @@ i=0
 
 echo ","
 
+# --- mlton benchmarks ---
+
+cd ../mlton/
+
+make &>/dev/null
+
+echo "\"mlton\":"
+i=0
+{
+	for benchmark in $TRACKED; do
+		echo "{\"$PREFIX/$benchmark\":"
+		arg=$(get_arg "$benchmark")
+		benchmark "./$benchmark $arg" "$arg"
+		echo "}"
+	done
+} | jq -s 'add'
+
+echo ","
+
 # --- Ocaml benchmarks ---
 
 cd ../ocaml/

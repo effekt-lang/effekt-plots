@@ -3,7 +3,7 @@ set -e
 
 >&2 echo "$0"
 
-TRACKED="countdown iterator nqueens parsing_dollars product_early resume_nontail tree_explore triples"
+TRACKED="countdown fibonacci_recursive generator iterator nqueens parsing_dollars product_early resume_nontail tree_explore triples"
 PREFIX="effect_handlers_bench"
 
 CONFIG_FILE="../../../../../effekt/examples/benchmarks/config_default.txt"
