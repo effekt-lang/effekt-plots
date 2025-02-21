@@ -5,23 +5,30 @@ import scala.scalajs.js
 import typings.chartJs.mod.*
 import utils.Color
 import utils.AnnotationContext
+import js.JSConverters._
 
 class Reference(benchmark: String, d: js.Object)(implicit C: AnnotationContext) extends Bar {
-  override def chartTitle: String = "Effekt vs. Reference Implementation: " + benchmark
+  override def chartTitle: String = "Effekt vs. Reference: " + benchmark
   override def xLabel = "language"
   override def yLabel = "time in seconds"
 
-  // override def tooltipBody(idx: Int) =
-  //   js.Array(
-  //     f"Commit: ${d(idx).meta.commit}",
-  //     f"Commit date: ${new js.Date(d(idx).meta.commitDate.asInstanceOf[String].toDouble * 1000).toLocaleString()}"
-  //   )
+  override def tooltipBody(idx: Int) = {
+    val languages = filterLanguages()
+    val obj = d.asInstanceOf[js.Dynamic].selectDynamic(languages(idx)).selectDynamic(benchmark)
+    js.Array(
+      f"Arg: ${obj.arg}",
+      f"Stddev: ${obj.stddev}"
+    )
+  }
 
-  def chartDataOpt = {
-    val languages = js.Object.keys(d).filter { language =>
+  def filterLanguages() =
+    js.Object.keys(d).filter { language =>
       d.asInstanceOf[js.Dynamic].selectDynamic(language).asInstanceOf[js.Object]
         .hasOwnProperty(benchmark) && language != "meta"
     }.map(_.toString)
+
+  def chartDataOpt = {
+    val languages = filterLanguages()
 
     if (languages.isEmpty) return None
 
@@ -34,11 +41,9 @@ class Reference(benchmark: String, d: js.Object)(implicit C: AnnotationContext) 
             val obj = d.asInstanceOf[js.Dynamic].selectDynamic(language).selectDynamic(benchmark)
             if (obj.asInstanceOf[js.Object].hasOwnProperty("mean"))
               obj.mean.asInstanceOf[Double]
-            else 0
+            else 0 // overflow, segfault etc.
           }
-          fill = false
-          backgroundColor = colorScheme.nextColor()
-          borderColor = backgroundColor
+          backgroundColor = colorScheme.scheme.toJSArray
         }
       )
     })
