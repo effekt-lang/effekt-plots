@@ -12,7 +12,7 @@ ARR_RENAMED=($RENAMED)
 
 # TODO: Should we somehow sync the arguments here?
 # TODO: we could supply a outer and inner loop iteration count to harness.*
-CONFIG_FILE="../../../../../effekt/examples/benchmarks/config_default.txt"
+# CONFIG_FILE="../../../../../effekt/examples/benchmarks/config_default.txt"
 
 # Hyperfine can only write JSON to files
 tmpfile=$(mktemp /tmp/hyperfine_are-we-fast-yet.XXXXX)
@@ -30,7 +30,7 @@ benchmark() {
 echo "{"
 
 # --- JavaScript benchmarks ---
-
+>&2 echo "JavaScript"
 cd reference/are-we-fast-yet/benchmarks/JavaScript/
 
 echo "\"js\":"
@@ -47,7 +47,7 @@ i=0
 echo ","
 
 # --- Python benchmarks ---
-
+>&2 echo "Python"
 cd ../Python
 
 echo "\"python\":"
@@ -64,7 +64,7 @@ i=0
 echo ","
 
 # --- Java benchmarks ---
-
+>&2 echo "Java"
 cd ../Java
 
 ./build.sh &>/dev/null
@@ -83,7 +83,7 @@ i=0
 echo ","
 
 # --- C++ benchmarks ---
-
+>&2 echo "C++"
 cd ../C++
 
 # generated using the build.sh script -- TODO: Do we want to change this?

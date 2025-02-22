@@ -29,17 +29,32 @@ benchmark() {
 echo "{"
 
 # --- Ocaml benchmarks ---
-
+>&2 echo "Ocaml"
 cd reference/effect-handlers-bench/benchmarks/ocaml/
 
-# TODO: add this to CI
-# opam switch create -y 4.12.0+domains+effects
-eval $(opam env --switch=4.12.0+domains+effects)
+eval $(opam env --switch=4.12.0+domains+effects --set-switch)
 
 make build &>/dev/null
 
 echo "\"ocaml\":"
-i=0
+{
+	for benchmark in $TRACKED; do
+		echo "{\"$PREFIX/$benchmark\":"
+		arg=$(get_arg "$benchmark")
+		benchmark "./$benchmark/main $arg" "$arg"
+		echo "}"
+	done
+} | jq -s 'add'
+
+echo ","
+
+# --- Eff benchmarks ---
+>&2 echo "Eff"
+cd ../eff/
+
+make build &>/dev/null
+
+echo "\"eff\":"
 {
 	for benchmark in $TRACKED; do
 		echo "{\"$PREFIX/$benchmark\":"

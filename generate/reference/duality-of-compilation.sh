@@ -29,13 +29,12 @@ benchmark() {
 echo "{"
 
 # --- Rust benchmarks ---
-
+>&2 echo "Rust"
 cd reference/duality-of-compilation/rust/
 
 make &>/dev/null
 
 echo "\"rust\":"
-i=0
 {
 	for benchmark in $TRACKED; do
 		echo "{\"$PREFIX/$benchmark\":"
@@ -48,14 +47,13 @@ i=0
 echo ","
 
 # --- Koka benchmarks ---
-
+>&2 echo "Koka"
 cd ../koka/
 
 # TODO: make this smarter (for CI)
 make KOKA_HOME=/usr/local/share/koka/v3.1.2/ &>/dev/null
 
 echo "\"koka\":"
-i=0
 {
 	for benchmark in $TRACKED; do
 		echo "{\"$PREFIX/$benchmark\":"
@@ -68,13 +66,12 @@ i=0
 echo ","
 
 # --- mlton benchmarks ---
-
+>&2 echo "mlton"
 cd ../mlton/
 
 make &>/dev/null
 
 echo "\"mlton\":"
-i=0
 {
 	for benchmark in $TRACKED; do
 		echo "{\"$PREFIX/$benchmark\":"
@@ -87,13 +84,12 @@ i=0
 echo ","
 
 # --- Ocaml benchmarks ---
-
+>&2 echo "ocaml"
 cd ../ocaml/
 
 make &>/dev/null
 
 echo "\"ocaml\":"
-i=0
 {
 	for benchmark in $TRACKED; do
 		echo "{\"$PREFIX/$benchmark\":"
