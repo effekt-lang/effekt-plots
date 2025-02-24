@@ -145,6 +145,9 @@ def renderMetricsSection(metricsData: js.Array[js.Dynamic])(implicit C: Annotati
 }
 
 def renderReferenceSection(referenceData: js.Array[js.Dynamic], backendReference: js.Array[js.Dynamic])(implicit C: AnnotationContext): HtmlElement = {
+  if (backendReference.isEmpty) return div()
+
+  // warning: ScalaJS loops endlessly on .last if empty!
   val latest = backendReference.last // TODO: make sure that the data is sorted
   val merged = js.Object.assign(js.Object(), latest.asInstanceOf[js.Object], referenceData.asInstanceOf[js.Object])
 
@@ -173,9 +176,7 @@ def renderPlots(normalize: Boolean, dateInterval: DateInterval): Future[HtmlElem
   val backendsData = preprocessor.filter(allData.backends)
   val backendReferenceData = preprocessor.filter(allData.backendReference)
 
-  // too much filtering, nothing left
-  if (phasesData.isEmpty) sectionTag()
-  else sectionTag(
+  sectionTag(
     h2("Build Performance", flexBasis.percent(100)),
     p("The time per phase is extracted using the Effekt `--time json` flag.", flexBasis.percent(100)),
     trackedPhaseDirectories.map { (dir: String) => renderPhaseSection(dir, phasesData) },
