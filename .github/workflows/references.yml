@@ -23,7 +23,7 @@ jobs:
         run: sudo apt -y install hyperfine ant
 
       - name: Set up C/C++
-        run: sudo apt -y install build-essential
+        run: sudo apt -y install build-essential clang
 
       - name: Set up Python 
         run: sudo apt -y install python3
