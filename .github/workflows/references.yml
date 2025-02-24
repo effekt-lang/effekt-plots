@@ -42,11 +42,10 @@ jobs:
       - name: Set up OCaml
         uses: ocaml/setup-ocaml@v3
         with:
-          ocaml-compiler: 5
+          ocaml-compiler: 4.12.0
 
       - name: Set up OCaml switches
         run: |
-          opam switch create -y 4.12.0
           opam switch create -y 4.12.0+domains+effects
 
       - name: Set up JDK 11
@@ -62,7 +61,6 @@ jobs:
 
       - name: Set up Eff
         run: |
-          eval $(opam env --switch=4.12.0 --set-switch)
           git clone https://github.com/matijapretnar/eff.git
           cd eff
           git checkout c27ffee3ddaaf6de383328d90750311508512ba6
