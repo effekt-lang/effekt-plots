@@ -1,0 +1,86 @@
+name: Sync reference benchmarks
+
+on: workflow_dispatch
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  sync:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Update index
+        run: sudo apt-get -y update
+
+      - name: Install dependencies
+        run: sudo apt -y install hyperfine
+
+      - name: Set up C/C++
+        run: sudo apt -y install build-essential
+
+      - name: Set up Python 
+        run: sudo apt -y install python3
+
+      - name: Set up mlton 
+        run: sudo apt -y install mlton
+
+      - name: Set up NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 16
+
+      - name: Set up Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Set up OCaml
+        uses: ocaml/setup-ocaml@v3
+
+      - name: Set up OCaml switches
+        run: |
+          opam switch create -y 4.12.0
+          opam switch create -y 4.12.0+domains+effects
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: 11
+          distribution: 'zulu'
+          cache: 'sbt'
+
+      - name: Set up Koka
+        run: |
+          curl -sSL https://github.com/koka-lang/koka/releases/download/v3.1.2/install.sh | sh
+
+      - name: Set up Eff
+        run: |
+          eval $(opam env --switch=4.12.0 --set-switch)
+          git clone https://github.com/matijapretnar/eff.git
+          cd eff
+          git checkout c27ffee3ddaaf6de383328d90750311508512ba6
+          opam install . -y
+          opam exec -- dune build src/eff
+          echo "${PWD}" >> "$GITHUB_PATH"
+          cd ..
+
+      - name: Update submodule
+        run: |
+          git submodule update --recursive --remote --init
+
+      - name: Generate data
+        run: |
+          cd generate/ && ./reference.sh sync
+
+      - name: Push new data
+        run: |
+          git add data
+          git config --global user.name 'GitHub Action'
+          git config --global user.email ''
+          git commit -m "GitHub Action: Manual reference sync"
+          git push

@@ -4,27 +4,21 @@ import typings.chartJs.mod.*
 import com.raquo.laminar.api.L.{*, given}
 
 import scala.scalajs.js
+import org.scalajs.dom
 
-trait LineStacked extends Generic {
+trait Bar extends Generic {
   def chartDataOpt: Option[ChartData]
 
-  def chartTitle = "Stacked Line Chart"
+  def chartTitle = "Bar Chart"
   def xLabel = "x axis"
   def yLabel = "y axis"
 
-  def normalize(data: ChartData) = {
-    val dat = data.datasets
-    val multipliers: js.Array[Double] = dat.get.map { el => 1.0 / el.data.get(0).get.asInstanceOf[Double] }
-    data.datasets = dat.get.zip(multipliers).map { case (el, multiplier) =>
-      el.data = el.data.get.map { d => multiplier * d.get.asInstanceOf[Double] }
-      el
-    }
-    data
-  }
+  // Annotations are not supported in Bar charts since they are categorical, not time-based
+  override def annotationPlugin(chart: Chart, easing: Easing, options: js.UndefOr[Any]): Unit = ()
 
   val chartConfigOpt = chartDataOpt.map { chartData => new ChartConfiguration {
-    `type` = ChartType.line
-    data = if (normalizeData) normalize(chartData) else chartData
+    `type` = ChartType.bar
+    data = chartData
     options = new ChartOptions {
       responsive = true
       maintainAspectRatio = false
@@ -45,18 +39,11 @@ trait LineStacked extends Generic {
       scales = new ChartScales {
         xAxes = js.Array(
           new ChartXAxe {
-            `type` = "time"
+            `type` = "category"
             distribution = typings.chartJs.chartJsStrings.series
-            time = new TimeScale {
-              unit = TimeUnit.hour
-              displayFormats = new TimeDisplayFormat {
-                hour = "hA, D.M."
-              }
-            }
-            stacked = true
             scaleLabel = new ScaleTitleOptions {
               display = true
-              labelString = if (normalizeData) xLabel ++ " (normalized to 1)" else xLabel
+              labelString = xLabel
             }
           }
         )
@@ -66,10 +53,9 @@ trait LineStacked extends Generic {
             ticks = new TickOptions {
               beginAtZero = true
             }
-            stacked = true
             scaleLabel = new ScaleTitleOptions {
               display = true
-              labelString = if (normalizeData) yLabel ++ " (normalized to 1)" else yLabel
+              labelString = yLabel
             }
           }
         )

@@ -8,6 +8,8 @@ import typings.chartJs.mod.*
 import utils.Color
 import utils.AnnotationContext
 
+import org.scalajs.dom
+
 class BackendsTime(d: js.Array[js.Dynamic], backend: String)(implicit C: AnnotationContext) extends LineStacked {
   override def chartTitle: String = s"Execution Time for $backend Backend"
   override def xLabel = "date"
@@ -21,15 +23,22 @@ class BackendsTime(d: js.Array[js.Dynamic], backend: String)(implicit C: Annotat
   def chartDataOpt = {
     if (d.isEmpty) return None
 
-    val keys = js.Object.keys(d(0).selectDynamic(backend).asInstanceOf[js.Object])
-      .filter { k => k != "meta" && k != "total" }
+    // TODO: We should really use actual structs / JSON
+    val main = d.asInstanceOf[js.Array[js.Object]].find(_.hasOwnProperty(backend))
+    if (main.isEmpty) return None
+
+    val keys = js.Object.keys(main.get.asInstanceOf[js.Dynamic].selectDynamic(backend).asInstanceOf[js.Object])
 
     Some(new ChartData {
       labels = d.map { e => new js.Date(e.meta.currentDate.asInstanceOf[String].toDouble * 1000) }
       datasets = keys.map { key =>
         new ChartDataSets {
           label = key
-          data = d.map { _.selectDynamic(backend).selectDynamic(key).time.asInstanceOf[Double] / 1e9 }
+          data = d.map { p =>
+            if (p.asInstanceOf[js.Object].hasOwnProperty(backend))
+              p.selectDynamic(backend).selectDynamic(key).time.asInstanceOf[Double] / 1e9
+            else 0
+          }
           backgroundColor = colorScheme.nextColor()
         }
       }

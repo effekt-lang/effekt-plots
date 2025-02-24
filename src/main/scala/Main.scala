@@ -10,6 +10,8 @@ import dom.ext.Ajax
 import scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scalajs.js
 
+import org.scalajs.dom
+
 val trackedPhaseDirectories = js.Array(
   "examples/casestudies/",
   // "/home/runner/work/effekt-plots/effekt-plots/effekt/libraries/",
@@ -35,7 +37,9 @@ case class Data(
   metrics: js.Array[js.Dynamic],
   buildTime: js.Array[js.Dynamic],
   backends: js.Array[js.Dynamic],
+  backendReference: js.Array[js.Dynamic],
   annotations: js.Array[js.Dynamic],
+  reference: js.Array[js.Dynamic],
 )
 
 def allDataInRange(interval: DateInterval) =
@@ -47,8 +51,10 @@ def allDataInRange(interval: DateInterval) =
     metrics <- load("metrics")
     buildTime <- load("build")
     backends <- load("backends")
+    backendReference <- load("reference")
     annotations <- loadJson("annotations.json")
-  } yield Data(phases, codeSize, generatedCodeSize, metrics, buildTime, backends, annotations)
+    reference <- loadJson("reference.json")
+  } yield Data(phases, codeSize, generatedCodeSize, metrics, buildTime, backends, backendReference, annotations, reference)
 
 def fileIndex() = loadJson("index.json").map(_.asInstanceOf[js.Array[String]].toSet)
 
@@ -138,8 +144,25 @@ def renderMetricsSection(metricsData: js.Array[js.Dynamic])(implicit C: Annotati
   )
 }
 
-def renderPlots(dateInterval: DateInterval): Future[HtmlElement] = allDataInRange(dateInterval).map { allData =>
-  given C: AnnotationContext = new AnnotationContext(allData.annotations)
+def renderReferenceSection(referenceData: js.Array[js.Dynamic], backendReference: js.Array[js.Dynamic])(implicit C: AnnotationContext): HtmlElement = {
+  if (backendReference.isEmpty) return div()
+
+  // warning: ScalaJS loops endlessly on .last if empty!
+  val latest = backendReference.last // TODO: make sure that the data is sorted
+  val merged = js.Object.assign(js.Object(), latest.asInstanceOf[js.Object], referenceData.asInstanceOf[js.Object])
+
+  val languages = js.Object.keys(merged)
+  val benchmarks = languages.flatMap(key => js.Object.keys(merged.asInstanceOf[js.Dynamic].selectDynamic(key).asInstanceOf[js.Object])).distinct
+
+  sectionTag(
+    benchmarks.map { benchmark =>
+      Reference(benchmark, merged.asInstanceOf[js.Dynamic]).draw()
+    }
+  )
+}
+
+def renderPlots(normalize: Boolean, dateInterval: DateInterval): Future[HtmlElement] = allDataInRange(dateInterval).map { allData =>
+  given C: AnnotationContext = new AnnotationContext(normalize, allData.annotations)
 
   val preprocessor = new TimePreprocessor((date: js.Date) => {
     date.getTime > dateInterval.start.getTime && date.getTime < dateInterval.end.getTime
@@ -151,19 +174,20 @@ def renderPlots(dateInterval: DateInterval): Future[HtmlElement] = allDataInRang
   val buildTimeData = preprocessor.filter(allData.buildTime)
   val metricsData = preprocessor.filter(allData.metrics)
   val backendsData = preprocessor.filter(allData.backends)
+  val backendReferenceData = preprocessor.filter(allData.backendReference)
 
-  // too much filtering, nothing left
-  if (phasesData.isEmpty) sectionTag()
-  else sectionTag(
-    h2("Phase times", flexBasis.percent(100)),
+  sectionTag(
+    h2("Build Performance", flexBasis.percent(100)),
     p("The time per phase is extracted using the Effekt `--time json` flag.", flexBasis.percent(100)),
     trackedPhaseDirectories.map { (dir: String) => renderPhaseSection(dir, phasesData) },
-    h2("Backend benchmarks", flexBasis.percent(100)),
+    h2("Performance over Time", flexBasis.percent(100)),
     trackedBenchmarks.map { (benchmarks: String) => renderBackendsSection(benchmarks, backendsData) },
-    h2("Build metrics", flexBasis.percent(100)),
+    h2("Relative Performance", flexBasis.percent(100)),
+    renderReferenceSection(allData.reference, backendReferenceData),
+    h2("Compiler Build Performance", flexBasis.percent(100)),
     p("The metrics are gathered by measuring `effekt -b <file>` using `gnutime`. Therefore, these metrics include the overhead of JVM.", flexBasis.percent(100)),
     renderMetricsSection(metricsData),
-    h2("General metrics", flexBasis.percent(100)),
+    h2("General Metrics", flexBasis.percent(100)),
     sectionTag(
       GeneratedCodeSize(generatedCodeSizeData, "llvm").draw(),
       GeneratedCodeSize(generatedCodeSizeData, "js").draw(),
@@ -184,6 +208,8 @@ val view = {
   val startDate = Var(nWeeksBack(4)) // default: 1 month
   val endDate = Var(new js.Date().toISOString().split('T')(0)) // today
 
+  val normalize = Var(false)
+
   div(
     div(
       className := "control",
@@ -201,19 +227,20 @@ val view = {
       button(
         "generate",
         onClick --> { _ =>
-          val start = new js.Date(startDate.now())
-          val end = new js.Date(endDate.now())
+          val rangeStart = new js.Date(startDate.now())
+          val rangeEnd = new js.Date(endDate.now())
 
           // set to start and end of day
-          start.setUTCHours(0, 0, 0, 0)
-          end.setUTCHours(23, 59, 59, 999)
+          rangeStart.setUTCHours(0, 0, 0, 0)
+          rangeEnd.setUTCHours(23, 59, 59, 999)
 
-          renderPlots(DateInterval(start, end)).map(renderBus.emit)
+          renderPlots(normalize.now(), DateInterval(rangeStart, rangeEnd)).map(renderBus.emit)
         }
       ),
     ),
     div(
       className := "control",
+      button("toggle normalization", onClick --> {_ => normalize.update(!_) }),
       button("last year", onClick --> {_ => startDate.set(nWeeksBack(52)) }),
       button("last month", onClick --> {_ => startDate.set(nWeeksBack(4)) }),
       button("last week", onClick --> {_ => startDate.set(nWeeksBack(1)) })

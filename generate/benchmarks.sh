@@ -21,18 +21,26 @@ done
 
 # now also measure execution time of backends based on benchmark configuration
 RUNS=5
+PRERUNS=2
 BACKENDS="llvm js"
 
-for backend in $BACKENDS; do
+benchmark() {
+	backend=$1
+
 	log="benchmarks_$backend.log"
 	>"$log"
 	while read config; do
 		arr=($config)
-		file="examples/benchmarks/${arr[0]}.effekt"
+		filename=${arr[0]}
+		file="examples/benchmarks/$filename.effekt"
 		outfile="out/$(basename "$file" .effekt)"
-		printf "${arr[0]} ${arr[1]} " >>"$log"
+		printf "$filename ${arr[1]} " >>"$log"
 
 		effekt.sh --backend "$backend" -b "$file"
+
+		for prerun in $(seq $PRERUNS); do
+			./"$outfile" "${arr[1]}" &>/dev/null
+		done
 
 		total_time=0
 		total_mem=0
@@ -50,4 +58,9 @@ for backend in $BACKENDS; do
 		average_mem=$((total_mem / RUNS))
 		echo "$average_time $average_mem" >>"$log"
 	done <"examples/benchmarks/config_$backend.txt"
+}
+
+# run benchmarks for all backends
+for backend in $BACKENDS; do
+	benchmark "$backend"
 done
