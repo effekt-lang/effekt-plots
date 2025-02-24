@@ -34,7 +34,7 @@ cd reference/effect-handlers-bench/benchmarks/ocaml/
 
 eval $(opam env --switch=4.12.0+domains+effects --set-switch)
 
-make build &>/dev/null
+make build >&2
 
 echo "\"ocaml\":"
 {
@@ -52,7 +52,7 @@ echo ","
 >&2 echo "Eff"
 cd ../eff/
 
-make build &>/dev/null
+make build >&2
 
 echo "\"eff\":"
 {

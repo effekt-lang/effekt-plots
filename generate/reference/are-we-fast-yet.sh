@@ -67,7 +67,7 @@ echo ","
 >&2 echo "Java"
 cd ../Java
 
-./build.sh &>/dev/null
+./build.sh >&2
 
 echo "\"java\":"
 i=0
@@ -87,7 +87,7 @@ echo ","
 cd ../C++
 
 # generated using the build.sh script -- TODO: Do we want to change this?
-clang++ -Wall -Wextra -Wno-unused-private-field -O3 -flto -march=native -ffp-contract=off -std=c++17 src/harness.cpp src/deltablue.cpp src/memory/object_tracker.cpp src/richards.cpp -o harness &>/dev/null
+clang++ -Wall -Wextra -Wno-unused-private-field -O3 -flto -march=native -ffp-contract=off -std=c++17 src/harness.cpp src/deltablue.cpp src/memory/object_tracker.cpp src/richards.cpp -o harness >&2
 
 echo "\"cpp\":"
 i=0

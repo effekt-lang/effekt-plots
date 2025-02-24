@@ -32,7 +32,7 @@ echo "{"
 >&2 echo "Rust"
 cd reference/duality-of-compilation/rust/
 
-make &>/dev/null
+make >&2
 
 echo "\"rust\":"
 {
@@ -51,7 +51,7 @@ echo ","
 cd ../koka/
 
 # TODO: make this smarter (for CI)
-make KOKA_HOME=/usr/local/share/koka/v3.1.2/ &>/dev/null
+make KOKA_HOME=/usr/local/share/koka/v3.1.2/ >&2
 
 echo "\"koka\":"
 {
@@ -69,7 +69,7 @@ echo ","
 >&2 echo "mlton"
 cd ../mlton/
 
-make &>/dev/null
+make >&2
 
 echo "\"mlton\":"
 {
@@ -87,7 +87,7 @@ echo ","
 >&2 echo "ocaml"
 cd ../ocaml/
 
-make &>/dev/null
+make >&2
 
 echo "\"ocaml\":"
 {
