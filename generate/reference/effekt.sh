@@ -24,7 +24,7 @@ benchmark() {
 		{
 			while read config; do
 				arr=($config)
-				filename=${arr[0]}
+				filename=${arr[0]%.*}
 				file="examples/benchmarks/$filename.effekt"
 				outfile="out/$(basename "$file" .effekt)"
 
