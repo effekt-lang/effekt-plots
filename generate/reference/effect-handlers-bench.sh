@@ -52,7 +52,7 @@ echo ","
 >&2 echo "Eff"
 cd ../eff/
 
-eval $(opam env --switch=4.12.0 --set-switch)
+eval $(opam env --switch=/tmp/runner/effekt-plots/effekt-plots --set-switch)
 
 make build >&2
 
