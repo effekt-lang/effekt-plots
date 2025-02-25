@@ -55,7 +55,7 @@ i=0
 {
 	for benchmark in $TRACKED; do
 		echo "{\"$PREFIX/${ARR_RENAMED[$i]}\":"
-		benchmark "python harness.py $benchmark"
+		benchmark "python3 harness.py $benchmark"
 		echo "}"
 		i=$((i + 1))
 	done
