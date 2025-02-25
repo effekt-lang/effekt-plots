@@ -7,8 +7,6 @@ import utils.Color
 import utils.AnnotationContext
 import js.JSConverters._
 
-import org.scalajs.dom
-
 class Reference(benchmark: String, d: js.Dynamic)(implicit C: AnnotationContext) extends Bar {
   override def chartTitle: String = "Effekt vs. Reference: " + benchmark
   override def xLabel = "language"
@@ -44,17 +42,26 @@ class Reference(benchmark: String, d: js.Dynamic)(implicit C: AnnotationContext)
       obj.asInstanceOf[js.Object].hasOwnProperty("mean")
     }.headOption.map(_.mean.asInstanceOf[Double]).getOrElse(1.0)
 
+    val successfulRuns = languages.map(getLanguage).map {
+      _.asInstanceOf[js.Object].hasOwnProperty("mean")
+    }
+    val maxValue = successfulRuns.zip(languages).filter(_._1)
+      .map((_, language) => getLanguage(language).mean.asInstanceOf[Double])
+      .max * (1.0 / normalizationValue)
+
     Some(new ChartData {
       labels = languages.map { l => l }
       datasets = js.Array(
         new ChartDataSets {
-          data = languages.map { language =>
-            val obj = getLanguage(language)
-            if (obj.asInstanceOf[js.Object].hasOwnProperty("mean"))
-              (1.0 / normalizationValue) * obj.mean.asInstanceOf[Double]
-            else 0 // overflow, segfault etc.
+          data = successfulRuns.zip(languages).map {
+            case (true, language) =>
+              (1.0 / normalizationValue) * getLanguage(language).mean.asInstanceOf[Double]
+            case (false, _) => maxValue
           }
-          backgroundColor = colorScheme.scheme.toJSArray
+          backgroundColor = successfulRuns.zip(colorScheme.scheme.toJSArray).map {
+            case (true, color) => color
+            case (false, color) => "rgba(0, 0, 0, 0.1)"
+          }
         }
       )
     })

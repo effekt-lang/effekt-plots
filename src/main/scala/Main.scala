@@ -183,6 +183,7 @@ def renderPlots(normalize: Boolean, dateInterval: DateInterval): Future[HtmlElem
     h2("Performance over Time", flexBasis.percent(100)),
     trackedBenchmarks.map { (benchmarks: String) => renderBackendsSection(benchmarks, backendsData) },
     h2("Relative Performance", flexBasis.percent(100)),
+    p("Using the latest data point within the selected range.", flexBasis.percent(100)),
     renderReferenceSection(allData.reference, backendReferenceData),
     h2("Compiler Build Performance", flexBasis.percent(100)),
     p("The metrics are gathered by measuring `effekt -b <file>` using `gnutime`. Therefore, these metrics include the overhead of JVM.", flexBasis.percent(100)),
