@@ -52,6 +52,8 @@ echo ","
 >&2 echo "Eff"
 cd ../eff/
 
+eval $(opam env --switch=default --set-switch)
+
 make build >&2
 
 echo "\"eff\":"
