@@ -22,7 +22,7 @@ class BackendsMemory(d: js.Array[js.Dynamic], backend: String)(implicit C: Annot
     if (d.isEmpty) return None
 
     // TODO: We should really use actual structs / JSON
-    val main = d.asInstanceOf[js.Array[js.Object]].find(_.hasOwnProperty(backend))
+    val main = d.asInstanceOf[js.Array[js.Object]].reverse.find(_.hasOwnProperty(backend))
     if (main.isEmpty) return None
 
     val keys = js.Object.keys(main.get.asInstanceOf[js.Dynamic].selectDynamic(backend).asInstanceOf[js.Object])
@@ -33,7 +33,8 @@ class BackendsMemory(d: js.Array[js.Dynamic], backend: String)(implicit C: Annot
         new ChartDataSets {
           label = key
           data = d.map { p =>
-            if (p.asInstanceOf[js.Object].hasOwnProperty(backend)) {
+            if (p.asInstanceOf[js.Object].hasOwnProperty(backend)
+              && p.selectDynamic(backend).asInstanceOf[js.Object].hasOwnProperty(key)) {
               val entry = p.selectDynamic(backend).selectDynamic(key)
               if (entry.asInstanceOf[js.Object].hasOwnProperty("maxMem"))
                 entry.maxMem.asInstanceOf[Double] / 1e9
