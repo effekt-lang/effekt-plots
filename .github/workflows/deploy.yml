@@ -5,10 +5,11 @@ on:
     branches:
       - main
   workflow_run:
-    workflows: ["Sync benchmarks"]
+    workflows: ["Sync benchmarks", "Sync reference benchmarks"]
     branches: [main]
     types:
       - completed
+  workflow_dispatch:
 
 permissions:
   contents: read
