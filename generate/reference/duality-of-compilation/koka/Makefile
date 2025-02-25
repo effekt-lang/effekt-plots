@@ -1,6 +1,6 @@
 # set environment variable KOKA_HOME to the installation directory of koka!
 KOKA_HOME=/usr/local/share/koka/v3.1.1
-KOKA=koka --target c --stack=2048M --ccopts=-DKK_INT_NOREFCOUNT --sharedir $(KOKA_HOME) -O0
+KOKA=koka --target c --stack=2048M --ccopts=-DKK_INT_NOREFCOUNT --sharedir $(KOKA_HOME) -O3
 KOKA_VERSION=v3.1.1
 
 build:
