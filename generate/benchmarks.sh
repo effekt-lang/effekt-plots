@@ -1,7 +1,7 @@
 #!/bin/env bash
 set -e
 
->&2 echo "$0"
+>&2 echo "::group::$0"
 
 # we need to cd here since some examples import local files
 cd ../effekt/
@@ -16,7 +16,7 @@ done
 
 # then build and run all with JSON phase timings
 for file in $FILES; do
-	effekt.sh -o out/ --time json "$file" &>/dev/null
+	effekt.sh -o out/ --time json "$file" >&2
 done
 
 # now also measure execution time of backends based on benchmark configuration
@@ -39,7 +39,7 @@ benchmark() {
 		effekt.sh --backend "$backend" -b "$file"
 
 		for prerun in $(seq $PRERUNS); do
-			./"$outfile" "${arr[1]}" &>/dev/null
+			./"$outfile" "${arr[1]}" >&2
 		done
 
 		total_time=0
@@ -64,3 +64,5 @@ benchmark() {
 for backend in $BACKENDS; do
 	benchmark "$backend"
 done
+
+>&2 echo "::endgroup::"

@@ -1,7 +1,7 @@
 #!/bin/env bash
 set -e
 
->&2 echo "$0"
+>&2 echo "::group::$0"
 
 TRACKED="countdown fibonacci_recursive generator iterator nqueens parsing_dollars product_early resume_nontail tree_explore triples"
 PREFIX="effect_handlers_bench"
@@ -18,7 +18,7 @@ get_arg() {
 
 # command -> arg -> json
 benchmark() {
-	if hyperfine --export-json "$tmpfile" "$1" &>/dev/null; then
+	if hyperfine --export-json "$tmpfile" "$1" >&2; then
 		jq "{mean: .results[0].mean, stddev: .results[0].stddev, arg: $2}" "$tmpfile"
 	else
 		echo "{\"arg\": $2}"
@@ -29,7 +29,7 @@ benchmark() {
 echo "{"
 
 # --- Ocaml benchmarks ---
->&2 echo "Ocaml"
+>&2 echo "::group::ocaml"
 cd reference/effect-handlers-bench/benchmarks/ocaml/
 
 eval $(opam env --switch=4.12.0+domains+effects --set-switch)
@@ -47,9 +47,10 @@ echo "\"ocaml\":"
 } | jq -s 'add'
 
 echo ","
+>&2 echo "::endgroup::"
 
 # --- Eff benchmarks ---
->&2 echo "Eff"
+>&2 echo "::group::eff"
 cd ../eff/
 
 eval $(opam env --switch=/tmp/runner/effekt-plots/effekt-plots --set-switch)
@@ -66,6 +67,8 @@ echo "\"eff\":"
 	done
 } | jq -s 'add'
 
+>&2 echo "::endgroup::"
+
 # --- Koka benchmarks ---
 
 # TODO: This uses a very old version and is broken with current
@@ -75,3 +78,5 @@ echo "\"eff\":"
 # output end
 echo "}"
 rm "$tmpfile"
+
+>&2 echo "::endgroup::"

@@ -1,7 +1,7 @@
 #!/bin/env bash
 set -e
 
->&2 echo "$0"
+>&2 echo "::group::$0"
 
 cd ../effekt/
 
@@ -11,7 +11,7 @@ BACKENDS="llvm js"
 tmpfile=$(mktemp /tmp/hyperfine_effekt.XXXXX)
 
 benchmark() {
-	if hyperfine --export-json "$tmpfile" "$1" &>/dev/null; then
+	if hyperfine --export-json "$tmpfile" "$1" >&2; then
 		jq "{mean: .results[0].mean, stddev: .results[0].stddev, arg: $2}" "$tmpfile"
 	else
 		echo "{\"arg\": $2}"
@@ -29,7 +29,7 @@ benchmark() {
 				outfile="out/$(basename "$file" .effekt)"
 
 				echo "{\"$filename\":"
-				effekt.sh --backend "$backend" -b "$file" &>/dev/null
+				effekt.sh --backend "$backend" -b "$file" >&2
 				arg=${arr[1]}
 				benchmark "./$outfile $arg" "$arg"
 				echo "}"
@@ -40,3 +40,5 @@ benchmark() {
 } | jq -s 'add'
 
 rm "$tmpfile"
+
+>&2 echo "::endgroup::"

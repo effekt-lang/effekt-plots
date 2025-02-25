@@ -1,7 +1,7 @@
 #!/bin/env bash
 set -e
 
->&2 echo "$0"
+>&2 echo "::group::$0"
 
 TRACKED="erase_unused factorial_accumulator fibonacci_recursive iterate_increment lookup_tree match_options sum_range"
 PREFIX="duality_of_compilation"
@@ -18,7 +18,7 @@ get_arg() {
 
 # command -> arg -> json
 benchmark() {
-	if hyperfine --export-json "$tmpfile" "$1" &>/dev/null; then
+	if hyperfine --export-json "$tmpfile" "$1" >&2; then
 		jq "{mean: .results[0].mean, stddev: .results[0].stddev, arg: $2}" "$tmpfile"
 	else
 		echo "{\"arg\": $2}"
@@ -29,7 +29,7 @@ benchmark() {
 echo "{"
 
 # --- Rust benchmarks ---
->&2 echo "Rust"
+>&2 echo "::group::rust"
 cd reference/duality-of-compilation/rust/
 
 make >&2
@@ -45,9 +45,10 @@ echo "\"rust\":"
 } | jq -s 'add'
 
 echo ","
+>&2 echo "::endgroup::"
 
 # --- Koka benchmarks ---
->&2 echo "Koka"
+>&2 echo "::group::koka"
 cd ../koka/
 
 # TODO: make this smarter (for CI)
@@ -64,9 +65,10 @@ echo "\"koka\":"
 } | jq -s 'add'
 
 echo ","
+>&2 echo "::endgroup::"
 
 # --- mlton benchmarks ---
->&2 echo "mlton"
+>&2 echo "::group::mlton"
 cd ../mlton/
 
 make >&2
@@ -82,9 +84,10 @@ echo "\"mlton\":"
 } | jq -s 'add'
 
 echo ","
+>&2 echo "::endgroup::"
 
 # --- Ocaml benchmarks ---
->&2 echo "ocaml"
+>&2 echo "::group::ocaml"
 cd ../ocaml/
 
 make >&2
@@ -99,8 +102,12 @@ echo "\"ocaml\":"
 	done
 } | jq -s 'add'
 
+>&2 echo "::endgroup::"
+
 # --- Done ---
 
 # output end
 echo "}"
 rm "$tmpfile"
+
+>&2 echo "::endgroup::"

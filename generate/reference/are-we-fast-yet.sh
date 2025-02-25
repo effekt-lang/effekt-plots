@@ -1,7 +1,7 @@
 #!/bin/env bash
 set -e
 
->&2 echo "$0"
+>&2 echo "::group::$0"
 
 # are-we-fast-yet uses different filenames than we do!
 TRACKED="Bounce List Mandelbrot NBody Permute Queens Sieve Storage Towers"
@@ -19,7 +19,7 @@ tmpfile=$(mktemp /tmp/hyperfine_are-we-fast-yet.XXXXX)
 
 # command -> json
 benchmark() {
-	if hyperfine --export-json "$tmpfile" "$1" &>/dev/null; then
+	if hyperfine --export-json "$tmpfile" "$1" >&2; then
 		jq "{mean: .results[0].mean, stddev: .results[0].stddev, arg: 0}" "$tmpfile"
 	else
 		echo "{\"arg\": 0}"
@@ -30,7 +30,7 @@ benchmark() {
 echo "{"
 
 # --- JavaScript benchmarks ---
->&2 echo "JavaScript"
+>&2 echo "::group::js"
 cd reference/are-we-fast-yet/benchmarks/JavaScript/
 
 echo "\"js\":"
@@ -45,9 +45,10 @@ i=0
 } | jq -s 'add'
 
 echo ","
+>&2 echo "::endgroup::"
 
 # --- Python benchmarks ---
->&2 echo "Python"
+>&2 echo "::group::python"
 cd ../Python
 
 echo "\"python\":"
@@ -62,9 +63,10 @@ i=0
 } | jq -s 'add'
 
 echo ","
+>&2 echo "::endgroup::"
 
 # --- Java benchmarks ---
->&2 echo "Java"
+>&2 echo "::group::java"
 cd ../Java
 
 ./build.sh >&2
@@ -81,9 +83,10 @@ i=0
 } | jq -s 'add'
 
 echo ","
+>&2 echo "::endgroup::"
 
 # --- C++ benchmarks ---
->&2 echo "C++"
+>&2 echo "::group::cpp"
 cd ../C++
 
 # generated using the build.sh script -- TODO: Do we want to change this?
@@ -100,8 +103,12 @@ i=0
 	done
 } | jq -s 'add'
 
+>&2 echo "::endgroup::"
+
 # --- Done ---
 
 # output end
 echo "}"
 rm "$tmpfile"
+
+>&2 echo "::endgroup::"
