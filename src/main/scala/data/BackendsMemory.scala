@@ -37,7 +37,7 @@ class BackendsMemory(d: js.Array[js.Dynamic], backend: String)(implicit C: Annot
               && p.selectDynamic(backend).asInstanceOf[js.Object].hasOwnProperty(key)) {
               val entry = p.selectDynamic(backend).selectDynamic(key)
               if (entry.asInstanceOf[js.Object].hasOwnProperty("maxMem"))
-                entry.maxMem.asInstanceOf[Double] / 1e9
+                entry.maxMem.asInstanceOf[Double]
               else 0
             }
             else 0
