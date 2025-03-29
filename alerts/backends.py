@@ -56,13 +56,14 @@ for backend in backends:
 
 
 def emoji(z):
+    SIGNIFICANT_MULT = 1.5
     if z > 0:
-        if z > 1.5 * Z_THRESHOLD:
+        if z > SIGNIFICANT_MULT * Z_THRESHOLD:
             return "⏫"
         else:
             return "🔼"
     else:
-        if z < 1.5 * Z_THRESHOLD:
+        if z < -SIGNIFICANT_MULT * Z_THRESHOLD:
             return "⏬"
         else:
             return "🔽"
