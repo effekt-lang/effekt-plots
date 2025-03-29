@@ -5,8 +5,8 @@ import json
 import sys
 import os
 
-N = 20
-SIGMA_MULT = 3
+N = 10
+Z_THRESHOLD = 2
 DIR = "../data/backends/"
 
 files = sorted(os.listdir(DIR))
@@ -41,7 +41,8 @@ for backend in backends:
         sd = statistics.stdev(runs)
 
         newest = merged[backend][file][-1]
-        if newest > mean + sd * SIGMA_MULT:
+        z = (newest - mean) / sd
+        if abs(z) > Z_THRESHOLD:
             outliers.append(
                 {
                     "backend": backend,
@@ -49,16 +50,31 @@ for backend in backends:
                     "value": newest,
                     "mean": mean,
                     "sd": sd,
+                    "z": z,
                 }
             )
 
+
+def emoji(z):
+    if z > 0:
+        if z > 1.5 * Z_THRESHOLD:
+            return "⏫"
+        else:
+            return "🔼"
+    else:
+        if z < 1.5 * Z_THRESHOLD:
+            return "⏬"
+        else:
+            return "🔽"
+
+
 if outliers:
     print("# Backend outliers detected!\n")
-    print(f"Configuration: `N={N}`, significant if `time > μ+{SIGMA_MULT}σ`\n")
+    print(f"Configuration: `N={N}`, significant if `z-score > {Z_THRESHOLD}`\n")
     print(
         "\n".join(
             [
-                f"- Backend: {outlier['backend']}, file: `{outlier['file']}`, time: {outlier['value'] / 1e9:.3f}s (μ={outlier['mean']/1e9:.3f}s, σ={outlier['sd']/1e9:.3f}s)"
+                f"- {emoji(outlier['z'])} in backend: {outlier['backend']}, file: `{outlier['file']}`, time: {outlier['value'] / 1e9:.3f}s (μ={outlier['mean']/1e9:.3f}s, σ={outlier['sd']/1e9:.3f}s, z={outlier['z']:.3f})"
                 for outlier in outliers
             ]
         )
