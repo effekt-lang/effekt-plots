@@ -6,7 +6,7 @@ import sys
 import os
 
 N = 10
-Z_THRESHOLD = 2
+Z_THRESHOLD = 3
 DIR = "../data/backends/"
 
 files = sorted(os.listdir(DIR))
@@ -56,7 +56,7 @@ for backend in backends:
 
 
 def emoji(z):
-    SIGNIFICANT_MULT = 1.5
+    SIGNIFICANT_MULT = 1.333
     if z > 0:
         if z > SIGNIFICANT_MULT * Z_THRESHOLD:
             return "⏫"
