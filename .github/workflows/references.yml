@@ -20,7 +20,7 @@ jobs:
         run: sudo apt-get -y update
 
       - name: Install dependencies
-        run: sudo apt -y install hyperfine ant
+        run: sudo apt -y install hyperfine ant bubblewrap
 
       - name: Set up C/C++
         run: sudo apt -y install build-essential clang
