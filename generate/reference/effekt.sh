@@ -11,7 +11,7 @@ BACKENDS="llvm js"
 tmpfile=$(mktemp /tmp/hyperfine_effekt.XXXXX)
 
 benchmark() {
-	if hyperfine --export-json "$tmpfile" "$1" >&2; then
+	if hyperfine --export-json "$tmpfile" --show-output "$1" >&2; then
 		jq "{mean: .results[0].mean, stddev: .results[0].stddev, arg: $2}" "$tmpfile"
 	else
 		echo "{\"arg\": $2}"
