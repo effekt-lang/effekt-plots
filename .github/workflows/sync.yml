@@ -67,6 +67,8 @@ jobs:
       - name: Generate data
         run: |
           cd generate/ && ./main.sh
+        env:
+          NODE_OPTIONS: "--max-old-space-size=8192"
 
       - name: Detect outliers
         run: |
