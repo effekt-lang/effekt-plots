@@ -23,6 +23,9 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Set env
+        run: echo "NODE_OPTIONS=\"--max-old-space-size=8192\"" >> $GITHUB_ENV
+
       - name: Install libuv
         run: sudo apt-get install libuv1-dev
 
