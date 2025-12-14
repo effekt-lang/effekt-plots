@@ -29,7 +29,7 @@ benchmark() {
 				outfile="out/$(basename "$file" .effekt)"
 
 				echo "{\"$filename\":"
-				effekt.sh --backend "$backend" -b "$file" >&2
+				effekt --backend "$backend" -b "$file" >&2
 				arg=${arr[1]}
 				benchmark "./$outfile $arg" "$arg"
 				echo "}"

@@ -18,7 +18,7 @@ while read config; do
 
 	arg=$ARG_INIT
 	while true; do
-		time="$(timeout "$TIMEOUT"s effekt.sh --backend "$BACKEND" "$file" -- "$arg")"
+		time="$(timeout "$TIMEOUT"s effekt --backend "$BACKEND" "$file" -- "$arg")"
 		if [[ "$?" -eq 124 ]]; then
 			echo "  $arg timeouted" >&2
 			arg=$((arg - (arg / 3) - 1))

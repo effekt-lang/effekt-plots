@@ -11,12 +11,12 @@ FILES="examples/casestudies/*.effekt.md"
 
 # measure build performance first
 for file in $FILES; do
-	"$(which time)" --verbose effekt.sh -o buildout/ -b "$file" >/dev/null 2>"$file.time.out"
+	"$(which time)" --verbose effekt -o buildout/ -b "$file" >/dev/null 2>"$file.time.out"
 done
 
 # then build and run all with JSON phase timings
 for file in $FILES; do
-	effekt.sh -o out/ --time json "$file" >&2
+	effekt -o out/ --time json "$file" >&2
 done
 
 # now also measure execution time of backends based on benchmark configuration
@@ -36,7 +36,7 @@ benchmark() {
 		outfile="out/$(basename "$file" .effekt)"
 		printf "$filename ${arr[1]} " >>"$log"
 
-		effekt.sh --backend "$backend" -b "$file"
+		effekt --backend "$backend" -b "$file"
 
 		for prerun in $(seq $PRERUNS); do
 			./"$outfile" "${arr[1]}" >&2
