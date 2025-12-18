@@ -3,7 +3,7 @@ set -e
 
 >&2 echo "$0"
 
-BACKENDS="llvm js"
+BACKENDS="llvm js chez-cps"
 
 merge() {
 	backend=$1

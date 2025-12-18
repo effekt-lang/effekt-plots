@@ -5,7 +5,7 @@ set -e
 
 cd ../effekt/
 
-BACKENDS="llvm js"
+BACKENDS="llvm js chez-cps"
 
 # Hyperfine can only write JSON to files
 tmpfile=$(mktemp /tmp/hyperfine_effekt.XXXXX)

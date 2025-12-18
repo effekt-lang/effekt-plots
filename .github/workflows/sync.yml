@@ -59,7 +59,7 @@ jobs:
       - name: Install generator dependencies
         run: |
           sudo apt -y update
-          sudo apt -y install jq cloc python3 git time llvm-18 clang gawk hyperfine
+          sudo apt -y install jq cloc python3 git time llvm-18 clang chezscheme gawk hyperfine
 
       - name: Generate data
         run: |
