@@ -49,7 +49,7 @@ jobs:
       - name: Checkout most recent commit
         if: "${{ github.event.inputs.effekt_commit == '' }}"
         run: |
-          git -C effekt/ checkout master
+          git -C effekt/ checkout main
           git -C effekt/ pull
 
       - name: Update submodule
