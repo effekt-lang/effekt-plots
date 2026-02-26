@@ -15,4 +15,8 @@ cd ../effekt/out/
 	echo "{\"js\":"
 	cloc --by-file --json *.js | jq 'del(.header)'
 	echo "}"
+
+	echo "{\"chez-cps\":"
+	cloc --by-file --json *.ss | jq 'del(.header)'
+	echo "}"
 } | jq -s 'add'
