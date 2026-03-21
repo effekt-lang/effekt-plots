@@ -22,7 +22,7 @@ done
 # now also measure execution time of backends based on benchmark configuration
 RUNS=5
 PRERUNS=2
-BACKENDS="llvm js"
+BACKENDS="llvm js chez-cps"
 
 benchmark() {
 	backend=$1
