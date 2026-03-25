@@ -19,7 +19,11 @@ class GeneratedCodeSize(d: js.Array[js.Dynamic], backend: String)(implicit C: An
   def chartDataOpt = {
     if (d.isEmpty) return None
 
-    val keys = js.Object.keys(d(0).selectDynamic(backend).asInstanceOf[js.Object])
+    // TODO: We should really use actual structs / JSON
+    val main = d.asInstanceOf[js.Array[js.Object]].reverse.find(_.hasOwnProperty(backend))
+    if (main.isEmpty) return None
+
+    val keys = js.Object.keys(main.get.asInstanceOf[js.Dynamic].selectDynamic(backend).asInstanceOf[js.Object])
       .filter { k => k != "meta" && k != "SUM" }
 
     Some(new ChartData {
@@ -27,10 +31,11 @@ class GeneratedCodeSize(d: js.Array[js.Dynamic], backend: String)(implicit C: An
       datasets = keys.map { key =>
         new ChartDataSets {
           label = key
-          data = d.map { e =>
-            val value = e.selectDynamic(backend).selectDynamic(key)
-            if (value == js.undefined) 0
-            else value.code.asInstanceOf[Double]
+          data = d.map { p =>
+            if (p.asInstanceOf[js.Object].hasOwnProperty(backend)
+              && p.selectDynamic(backend).asInstanceOf[js.Object].hasOwnProperty(key))
+              p.selectDynamic(backend).selectDynamic(key).code.asInstanceOf[Double]
+            else 0
           }
           backgroundColor = colorScheme.nextColor()
         }
