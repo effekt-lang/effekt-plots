@@ -121,8 +121,10 @@ def renderBackendsSection(prefix: String, backendsData: js.Array[js.Dynamic])(im
     h3(prefix, flexBasis.percent(100)),
     BackendsTime(filtered, "llvm").draw(),
     BackendsTime(filtered, "js").draw(),
+    BackendsTime(filtered, "chez-cps").draw(),
     BackendsMemory(filtered, "llvm").draw(),
     BackendsMemory(filtered, "js").draw(),
+    BackendsMemory(filtered, "chez-cps").draw(),
   )
 }
 
@@ -192,6 +194,7 @@ def renderPlots(normalize: Boolean, dateInterval: DateInterval): Future[HtmlElem
     sectionTag(
       GeneratedCodeSize(generatedCodeSizeData, "llvm").draw(),
       GeneratedCodeSize(generatedCodeSizeData, "js").draw(),
+      GeneratedCodeSize(generatedCodeSizeData, "chez-cps").draw(),
       CodeSize(codeSizeData).draw(),
       EffektBuildTime(buildTimeData).draw(),
     ),
