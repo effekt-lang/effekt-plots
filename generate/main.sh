@@ -4,6 +4,7 @@ set -e
 >&2 echo "::group::$0"
 
 ./build.sh | ./append.sh build
+./adoption.sh | ./append.sh adoption
 ./reference.sh | ./append.sh reference
 ./benchmarks.sh
 

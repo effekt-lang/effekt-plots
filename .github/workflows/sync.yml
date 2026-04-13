@@ -66,6 +66,7 @@ jobs:
           cd generate/ && ./main.sh
         env:
           NODE_OPTIONS: "--max-old-space-size=8192"
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Detect outliers
         run: |
