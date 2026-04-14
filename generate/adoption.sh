@@ -1,5 +1,5 @@
 #!/bin/env bash
-set -e
+set +e
 
 >&2 echo "$0"
 
@@ -9,7 +9,8 @@ QUERY='NOT is:fork NOT user:effekt-lang extension:effekt'
 # GH api sometimes returns smaller numbers, so we run a few times and take the maximum, lol
 max_count=0
 for _ in $(seq $TRIALS); do
-	count=$(gh api -X GET search/code -f q="$QUERY" -f per_page=1 | jq -r '.total_count')
+	count=$(gh api -X GET search/code -f q="$QUERY" -f per_page=1 2>/dev/null | jq -r '.total_count')
+	if [ "$count" = "null" ]; then count=0; fi
 	if ((count > max_count)); then
 		max_count=$count
 	fi
