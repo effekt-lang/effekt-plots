@@ -32,7 +32,7 @@ echo "{"
 >&2 echo "::group::ocaml"
 cd reference/effect-handlers-bench/benchmarks/ocaml/
 
-eval $(opam env --switch=4.12.0+domains+effects --set-switch)
+eval $(opam env --switch=5.3.0 --set-switch)
 
 make build >&2
 
