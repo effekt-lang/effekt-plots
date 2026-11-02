@@ -64,6 +64,7 @@ jobs:
           git clone https://github.com/matijapretnar/eff.git
           cd eff
           git checkout c27ffee3ddaaf6de383328d90750311508512ba6
+          opam install menhir.20250912 -y
           opam install . -y
           opam exec -- dune build src/eff
           echo "${PWD}" >> "$GITHUB_PATH"
