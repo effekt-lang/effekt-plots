@@ -21,7 +21,8 @@ val trackedBenchmarks = js.Array(
   "are_we_fast_yet",
   "duality_of_compilation",
   "effect_handlers_bench",
-  "input_output"
+  "input_output",
+  "folklore_to_fact",
 )
 
 val trackedIndividualBuild = js.Array(
