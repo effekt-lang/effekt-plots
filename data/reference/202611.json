@@ -10815,5 +10815,378 @@
       "commitDate": "1794177487",
       "currentDate": "1794187174"
     }
+  },
+  {
+    "effekt_llvm": {
+      "are_we_fast_yet/bounce": {
+        "mean": 0.000963064276271592,
+        "stddev": 0.00018392938659191033,
+        "arg": 50
+      },
+      "are_we_fast_yet/list_tail": {
+        "mean": 0.0009019787402301502,
+        "stddev": 0.00018540660574478885,
+        "arg": 15
+      },
+      "are_we_fast_yet/mandelbrot": {
+        "mean": 0.0008801626550591166,
+        "stddev": 0.00025691446851919074,
+        "arg": 1
+      },
+      "are_we_fast_yet/nbody": {
+        "mean": 0.0007927110115200932,
+        "stddev": 0.00009017183603128716,
+        "arg": 1
+      },
+      "are_we_fast_yet/permute": {
+        "mean": 0.0009354561900768789,
+        "stddev": 0.00018757475653544535,
+        "arg": 6
+      },
+      "are_we_fast_yet/queens": {
+        "mean": 0.000861204899238755,
+        "stddev": 0.0002280164088578871,
+        "arg": 8
+      },
+      "are_we_fast_yet/sieve": {
+        "mean": 0.0009078066734325178,
+        "stddev": 0.0001413130336717968,
+        "arg": 5000
+      },
+      "are_we_fast_yet/storage": {
+        "mean": 0.0017717707595121925,
+        "stddev": 0.00016691439125855227,
+        "arg": 1
+      },
+      "are_we_fast_yet/towers": {
+        "mean": 0.0011244193494691884,
+        "stddev": 0.00018472847639625407,
+        "arg": 13
+      },
+      "duality_of_compilation/erase_unused": {
+        "mean": 0.0006958345576368874,
+        "stddev": 0.00014987537215575055,
+        "arg": 10000
+      },
+      "duality_of_compilation/factorial_accumulator": {
+        "mean": 0.039365561859999995,
+        "stddev": 0.00030782837614115865,
+        "arg": 10000000
+      },
+      "duality_of_compilation/fibonacci_recursive": {
+        "mean": 0.59607770908,
+        "stddev": 0.03403796103088624,
+        "arg": 40
+      },
+      "duality_of_compilation/iterate_increment": {
+        "mean": 0.0008096009671257163,
+        "stddev": 0.00017766339208988573,
+        "arg": 100000000
+      },
+      "duality_of_compilation/lookup_tree": {
+        "mean": 0.8764472701200001,
+        "stddev": 0.12988728452893175,
+        "arg": 10000000
+      },
+      "duality_of_compilation/match_options": {
+        "mean": 0.1566001873222222,
+        "stddev": 0.0044703983761714885,
+        "arg": 10000000
+      },
+      "duality_of_compilation/sum_range": {
+        "mean": 0.7892965659600001,
+        "stddev": 0.04461261614537807,
+        "arg": 10000000
+      },
+      "effect_handlers_bench/countdown": {
+        "mean": 0.000810924392068231,
+        "stddev": 0.00010612446806266496,
+        "arg": 200000000
+      },
+      "effect_handlers_bench/iterator": {
+        "mean": 0.011686994453755279,
+        "stddev": 0.0004330346131041409,
+        "arg": 40000000
+      },
+      "effect_handlers_bench/nqueens": {
+        "mean": 0.42489743166,
+        "stddev": 0.004845252091431092,
+        "arg": 12
+      },
+      "effect_handlers_bench/parsing_dollars": {
+        "mean": 0.0008466622238819521,
+        "stddev": 0.00025776516454779815,
+        "arg": 20000
+      },
+      "effect_handlers_bench/product_early": {
+        "mean": 0.31080144918,
+        "stddev": 0.0011570486003999007,
+        "arg": 100000
+      },
+      "effect_handlers_bench/resume_nontail": {
+        "mean": 0.1308995317945455,
+        "stddev": 0.0007807712525464805,
+        "arg": 10000
+      },
+      "effect_handlers_bench/tree_explore": {
+        "mean": 0.20944389345428574,
+        "stddev": 0.0019233220666243552,
+        "arg": 16
+      },
+      "effect_handlers_bench/triples": {
+        "mean": 0.12753146330869566,
+        "stddev": 0.002337534831919648,
+        "arg": 300
+      }
+    },
+    "effekt_js": {
+      "are_we_fast_yet/bounce": {
+        "mean": 0.05343530134000002,
+        "stddev": 0.001799860839588161,
+        "arg": 50
+      },
+      "are_we_fast_yet/list_tail": {
+        "mean": 0.0463456835695238,
+        "stddev": 0.0011277667187775944,
+        "arg": 15
+      },
+      "are_we_fast_yet/mandelbrot": {
+        "mean": 0.04386466348387098,
+        "stddev": 0.0018471111593239852,
+        "arg": 1
+      },
+      "are_we_fast_yet/nbody": {
+        "mean": 0.04448554201269841,
+        "stddev": 0.0013098417848278175,
+        "arg": 1
+      },
+      "are_we_fast_yet/permute": {
+        "mean": 0.055668199810566046,
+        "stddev": 0.002045057971855083,
+        "arg": 6
+      },
+      "are_we_fast_yet/queens": {
+        "mean": 0.046496270314754104,
+        "stddev": 0.0019808890450079652,
+        "arg": 8
+      },
+      "are_we_fast_yet/sieve": {
+        "mean": 0.04780464753868853,
+        "stddev": 0.0018156467981802437,
+        "arg": 5000
+      },
+      "are_we_fast_yet/storage": {
+        "mean": 0.053114212398181836,
+        "stddev": 0.0016778474801248987,
+        "arg": 1
+      },
+      "are_we_fast_yet/towers": {
+        "mean": 0.05243826980363636,
+        "stddev": 0.0014658316864243036,
+        "arg": 13
+      },
+      "duality_of_compilation/erase_unused": {
+        "mean": 0.044669469676363635,
+        "stddev": 0.0017774457871965593,
+        "arg": 10000
+      },
+      "duality_of_compilation/factorial_accumulator": {
+        "mean": 0.21065018562000004,
+        "stddev": 0.00297263020907199,
+        "arg": 10000000
+      },
+      "duality_of_compilation/fibonacci_recursive": {
+        "mean": 12.97572712566,
+        "stddev": 0.2742291275013829,
+        "arg": 40
+      },
+      "duality_of_compilation/iterate_increment": {
+        "mean": 0.22460075599384616,
+        "stddev": 0.001908816229270245,
+        "arg": 100000000
+      },
+      "duality_of_compilation/lookup_tree": {
+        "mean": 5.165769480260001,
+        "stddev": 0.2286817129844314,
+        "arg": 10000000
+      },
+      "duality_of_compilation/match_options": {
+        "mean": 3.60532747274,
+        "stddev": 0.08043893320878971,
+        "arg": 10000000
+      },
+      "duality_of_compilation/sum_range": {
+        "mean": 10.20091196372,
+        "stddev": 0.3615287537052609,
+        "arg": 10000000
+      },
+      "effect_handlers_bench/countdown": {
+        "mean": 0.43593925655999993,
+        "stddev": 0.0009120101437012377,
+        "arg": 200000000
+      },
+      "effect_handlers_bench/iterator": {
+        "mean": 0.4071642088400001,
+        "stddev": 0.00611531326563379,
+        "arg": 40000000
+      },
+      "effect_handlers_bench/nqueens": {
+        "mean": 1.83555283224,
+        "stddev": 0.015472515998959359,
+        "arg": 12
+      },
+      "effect_handlers_bench/parsing_dollars": {
+        "mean": 0.52484422978,
+        "stddev": 0.0047195707966230386,
+        "arg": 20000
+      },
+      "effect_handlers_bench/product_early": {
+        "mean": 2.20468271564,
+        "stddev": 0.15649501397155136,
+        "arg": 100000
+      },
+      "effect_handlers_bench/resume_nontail": {
+        "mean": 7.353954177259999,
+        "stddev": 0.30405707209225696,
+        "arg": 10000
+      },
+      "effect_handlers_bench/tree_explore": {
+        "mean": 1.5331826212,
+        "stddev": 0.03339408275579963,
+        "arg": 16
+      },
+      "effect_handlers_bench/triples": {
+        "mean": 1.44064361028,
+        "stddev": 0.0971898746772377,
+        "arg": 300
+      }
+    },
+    "effekt_chez-cps": {
+      "are_we_fast_yet/bounce": {
+        "mean": 0.09403533769333336,
+        "stddev": 0.0020357945809979824,
+        "arg": 50
+      },
+      "are_we_fast_yet/list_tail": {
+        "mean": 0.08978852078606062,
+        "stddev": 0.0036701302892684297,
+        "arg": 15
+      },
+      "are_we_fast_yet/mandelbrot": {
+        "mean": 0.08882820150303035,
+        "stddev": 0.005044995132141114,
+        "arg": 1
+      },
+      "are_we_fast_yet/nbody": {
+        "mean": 0.10337067851724141,
+        "stddev": 0.010398784977609363,
+        "arg": 1
+      },
+      "are_we_fast_yet/permute": {
+        "mean": 0.0882226283509091,
+        "stddev": 0.005764736953769809,
+        "arg": 6
+      },
+      "are_we_fast_yet/queens": {
+        "mean": 0.09589170492250002,
+        "stddev": 0.0073131143242624475,
+        "arg": 8
+      },
+      "are_we_fast_yet/sieve": {
+        "mean": 0.08895339982848484,
+        "stddev": 0.004391294470104459,
+        "arg": 5000
+      },
+      "are_we_fast_yet/storage": {
+        "mean": 0.08908521234874998,
+        "stddev": 0.007245659825279832,
+        "arg": 1
+      },
+      "are_we_fast_yet/towers": {
+        "mean": 0.09034607225212121,
+        "stddev": 0.0064902951650893876,
+        "arg": 13
+      },
+      "duality_of_compilation/erase_unused": {
+        "mean": 0.08517521276941178,
+        "stddev": 0.0051697711620316625,
+        "arg": 10000
+      },
+      "duality_of_compilation/factorial_accumulator": {
+        "mean": 0.22036025107076923,
+        "stddev": 0.0028632873419398848,
+        "arg": 10000000
+      },
+      "duality_of_compilation/fibonacci_recursive": {
+        "mean": 1.23416176912,
+        "stddev": 0.015311595559337822,
+        "arg": 40
+      },
+      "duality_of_compilation/iterate_increment": {
+        "mean": 0.21782610308769226,
+        "stddev": 0.00553652100736298,
+        "arg": 100000000
+      },
+      "duality_of_compilation/lookup_tree": {
+        "mean": 1.4534019219,
+        "stddev": 0.10610499270911439,
+        "arg": 10000000
+      },
+      "duality_of_compilation/match_options": {
+        "mean": 0.6041572254,
+        "stddev": 0.0037455817286626606,
+        "arg": 10000000
+      },
+      "duality_of_compilation/sum_range": {
+        "mean": 2.33420532504,
+        "stddev": 0.05704217647435036,
+        "arg": 10000000
+      },
+      "effect_handlers_bench/countdown": {
+        "mean": 0.3415624095,
+        "stddev": 0.0035736253963093104,
+        "arg": 200000000
+      },
+      "effect_handlers_bench/iterator": {
+        "mean": 0.13783091292000002,
+        "stddev": 0.002698140951094583,
+        "arg": 40000000
+      },
+      "effect_handlers_bench/nqueens": {
+        "mean": 0.45324547024,
+        "stddev": 0.003084680657932535,
+        "arg": 12
+      },
+      "effect_handlers_bench/parsing_dollars": {
+        "mean": 0.37194208530000006,
+        "stddev": 0.003371530263521728,
+        "arg": 20000
+      },
+      "effect_handlers_bench/product_early": {
+        "mean": 0.36124301502,
+        "stddev": 0.006834731451199686,
+        "arg": 100000
+      },
+      "effect_handlers_bench/resume_nontail": {
+        "mean": 0.44227837856,
+        "stddev": 0.005283084699597208,
+        "arg": 10000
+      },
+      "effect_handlers_bench/tree_explore": {
+        "mean": 0.374218351,
+        "stddev": 0.003104779877912081,
+        "arg": 16
+      },
+      "effect_handlers_bench/triples": {
+        "mean": 0.24607018720999999,
+        "stddev": 0.0049550186954978185,
+        "arg": 300
+      }
+    },
+    "meta": {
+      "commit": "804b7a241",
+      "commitDate": "1794235439",
+      "currentDate": "1794235690"
+    }
   }
 ]
