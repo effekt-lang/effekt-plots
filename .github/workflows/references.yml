@@ -71,6 +71,9 @@ jobs:
           echo "${PWD}" >> "$GITHUB_PATH"
           cd ..
 
+      - name: Set up Nix
+        uses: cachix/install-nix-action@v31
+
       - name: Update submodule
         run: |
           git submodule update --recursive --init

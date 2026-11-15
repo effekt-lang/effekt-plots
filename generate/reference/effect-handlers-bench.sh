@@ -67,6 +67,34 @@ echo "\"eff\":"
 	done
 } | jq -s 'add'
 
+echo ","
+>&2 echo "::endgroup::"
+
+# --- Lexa benchmarks ---
+>&2 echo "::group::lexa"
+cd ../../../
+
+[ -d lexa ] || git clone https://github.com/lexa-lang/lexa.git >&2
+cd lexa/
+
+nix develop .#userShell --accept-flake-config --ignore-environment --keep HOME --command bash -c "
+	for benchmark in $TRACKED; do
+		(cd benchmarks/lexa/\$benchmark && ../../../lexa main.lx -o main)
+	done
+" >&2
+
+cd benchmarks/lexa/
+
+echo "\"lexa\":"
+{
+	for benchmark in $TRACKED; do
+		echo "{\"$PREFIX/$benchmark\":"
+		arg=$(get_arg "$benchmark")
+		benchmark "./$benchmark/main $arg" "$arg"
+		echo "}"
+	done
+} | jq -s 'add'
+
 >&2 echo "::endgroup::"
 
 # --- Koka benchmarks ---
