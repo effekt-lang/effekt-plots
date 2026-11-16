@@ -14,7 +14,8 @@ trait Generic(implicit C: AnnotationContext) {
 
   val colorScheme = Color()
 
-  def tooltipBody(idx: Int) = js.Array("")
+  def tooltipBody(index: Int) = js.Array("")
+  def commitAt(index: Int): Option[Meta] = None
 
   // TODO: This should probably be somewhere else
   def normalizeData = C.normalized
@@ -30,11 +31,28 @@ trait Generic(implicit C: AnnotationContext) {
     ctx.restore()
   }
 
-  def showAnnotation(reason: String) =
-    fire(
-      title="Reason",
-      html=reason
+  def showAnnotation(reason: String) = fire(title = "Reason", html = reason)
+
+  def showCommits(meta: Meta): Unit = {
+    val commitIndex = annotationContext.commits.indexWhere(_.hash.startsWith(meta.commit))
+    val nearbyCommits = if (commitIndex < 0) js.Array[utils.CommitJson]()
+    else annotationContext.commits.slice(
+      math.max(0, commitIndex - 3),
+      math.min(annotationContext.commits.length, commitIndex + 4)
     )
+    val commitItems = nearbyCommits.map { commit =>
+      val escapedMessage = commit.message
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace("\"", "&quot;")
+      s"<li><a href='https://github.com/effekt-lang/effekt/commit/${commit.hash}' target='_blank' rel='noopener noreferrer'>${commit.hash.take(10)}</a> $escapedMessage</li>"
+    }
+    val popupHtml = if (commitItems.isEmpty)
+      s"<a href='https://github.com/effekt-lang/effekt/commit/${meta.commit}' target='_blank' rel='noopener noreferrer'>${meta.commit}</a>"
+    else s"<ul class='commit-list'>${commitItems.join("")}</ul>"
+    fire(title = "Nearby commits", html = popupHtml)
+  }
 
   def annotationPlugin(chart: Chart, easing: Easing, options: js.UndefOr[Any]): Unit =
     val ctx = chart.ctx
@@ -50,46 +68,30 @@ trait Generic(implicit C: AnnotationContext) {
           (date.getTime - annotation.date.getTime).abs < 1000 * 60 * 20
         }
 
-        // specific date not found (e.g. not in filtered range)
-        if (index == -1)
-          boundary.break()
-
-        val meta = chart.getDatasetMeta(0)
-        val x = meta.data(index)._model.x
-        // for some reason ScalablyTyped doesn't know this API
-        val scale = chart.asInstanceOf[js.Dynamic].scales.`y-axis-0`
-        val y1 = scale.bottom.asInstanceOf[Double]
-        val y2 = scale.top.asInstanceOf[Double]
-        drawLine(ctx, x, y1, y2)
-
-        // add line click handler
-        val canvas = chart.canvas
-        val rect = canvas.getBoundingClientRect()
-        val clickHandler: js.Function1[dom.MouseEvent, Unit] = (event: dom.MouseEvent) => {
-          val clickX = event.clientX - rect.left
-          if (clickX > x - 10 && clickX < x + 10)
+        val handlerKey = (chartId, annotation.id)
+        annotationContext.annotationClickHandlers.get(handlerKey).foreach { previousHandler =>
+          chart.canvas.removeEventListener("click", previousHandler, false)
+        }
+        val annotationClickHandler: js.Function1[dom.MouseEvent, Unit] = (event: dom.MouseEvent) => {
+          val canvasLeft = chart.canvas.getBoundingClientRect().left
+          if ((event.clientX - canvasLeft - xPosition).abs < 10)
             showAnnotation(annotation.reason)
         }
-        chart.canvas.addEventListener("click", clickHandler, false)
-
-        // here we need to remove the old listener to avoid multiple handler invocations
-        //   because plugin afterDraw functions get called on every redraw
-        //   also: we can't use stopPropation() because it would disable handlers of other annotations in the same plot
-        if (C.handlers.contains((chartId, annotation.id)))
-          chart.canvas.removeEventListener("click", C.handlers((chartId, annotation.id)), false)
-        C.handlers((chartId, annotation.id)) = clickHandler
+        chart.canvas.addEventListener("click", annotationClickHandler, false)
+        annotationContext.annotationClickHandlers(handlerKey) = annotationClickHandler
       }
     }
   
-  // additional click handler to open prompt for copying commit information etc.
-  // again, we need to use a lot of hidden APIs to do this...
-  def clickHandler(event: js.UndefOr[dom.MouseEvent], activeElementsOpt: js.UndefOr[js.Array[js.Object]]) = {
-    if (activeElementsOpt.isDefined && !activeElementsOpt.get.isEmpty) {
-      val chart = activeElementsOpt.get(0).asInstanceOf[js.Dynamic]._chart.asInstanceOf[Chart]
+  def clickHandler(event: js.UndefOr[dom.MouseEvent], activeElements: js.UndefOr[js.Array[js.Object]]) = {
+    if (activeElements.isDefined && !activeElements.get.isEmpty) {
+      val chart = activeElements.get(0).asInstanceOf[ChartElement].`_chart`
       val clickedElements = chart.getElementAtEvent(event)
-      if (clickedElements.length == 1) { // single tooltip clicked
-        val index = clickedElements(0).asInstanceOf[js.Dynamic]._index.asInstanceOf[Int]
-        dom.window.prompt("Selected event:", tooltipBody(index).join(", "))
+      if (clickedElements.length == 1) {
+        val pointIndex = clickedElements(0).asInstanceOf[ChartElement].`_index`
+        commitAt(pointIndex) match {
+          case Some(meta) => showCommits(meta)
+          case None => fire(title = "Details", html = tooltipBody(pointIndex).join("<br>"))
+        }
       }
 
       // do not activate the annotation popup
