@@ -14,6 +14,15 @@ html, body {
     vertical-align: middle;
 }
 
+.header img.loading {
+	transform-origin: 33% 50%;
+    animation: spin .3s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
 .header span {
     font-size: 2em;
 }
@@ -107,4 +116,14 @@ div#main section {
 
 .legend-unselected {
     text-decoration: line-through;
+}
+
+.commit-list {
+    text-align: left;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.commit-list li {
+    margin: 0.5em 0;
 }
