@@ -38,10 +38,13 @@ trait Bar extends Generic {
   }
 
   val chartConfigOpt = chartDataOpt.map { chartData =>
+    val barOptions = chartOptions(chartScales)
+    barOptions.tooltips.get.mode = typings.chartJs.chartJsStrings.index
+    barOptions.tooltips.get.intersect = false
     new ChartConfiguration {
       `type` = ChartType.bar
       data = chartData
-      options = chartOptions(chartScales)
+      options = barOptions
     }
   }
 }
