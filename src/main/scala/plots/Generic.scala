@@ -4,31 +4,29 @@ import scalajs.js
 import typings.chartJs.mod.*
 import typings.sweetalert2.mod.default.*
 import com.raquo.laminar.api.L.{*, given}
-import utils.Color
-import utils.AnnotationContext
-import scala.util.boundary
+import utils.{AnnotationContext, Color, Meta}
 import org.scalajs.dom
 
-trait Generic(implicit C: AnnotationContext) {
+trait Generic(implicit annotationContext: AnnotationContext) {
   val chartConfigOpt: Option[ChartConfiguration]
+  def chartTitle: String
 
   val colorScheme = Color()
 
   def tooltipBody(index: Int) = js.Array("")
   def commitAt(index: Int): Option[Meta] = None
 
-  // TODO: This should probably be somewhere else
-  def normalizeData = C.normalized
+  def normalizeData = annotationContext.normalized
 
-  def drawLine(ctx: dom.CanvasRenderingContext2D, x: Double, y1: Double, y2: Double) = {
-    ctx.save()
-    ctx.beginPath()
-    ctx.moveTo(x, y1)
-    ctx.lineTo(x, y2)
-    ctx.lineWidth = 1
-    ctx.strokeStyle = "red"
-    ctx.stroke()
-    ctx.restore()
+  def drawLine(canvasContext: dom.CanvasRenderingContext2D, xPosition: Double, yBottom: Double, yTop: Double) = {
+    canvasContext.save()
+    canvasContext.beginPath()
+    canvasContext.moveTo(xPosition, yBottom)
+    canvasContext.lineTo(xPosition, yTop)
+    canvasContext.lineWidth = 1
+    canvasContext.strokeStyle = "red"
+    canvasContext.stroke()
+    canvasContext.restore()
   }
 
   def showAnnotation(reason: String) = fire(title = "Reason", html = reason)
@@ -55,18 +53,20 @@ trait Generic(implicit C: AnnotationContext) {
   }
 
   def annotationPlugin(chart: Chart, easing: Easing, options: js.UndefOr[Any]): Unit =
-    val ctx = chart.ctx
-    val chartId = chart.asInstanceOf[js.Dynamic].id.asInstanceOf[Int]
+    val canvasContext = chart.ctx
+    val chartId = chart.asInstanceOf[ChartInternals].id
 
-    C.annotations.foreach { annotation =>
-      boundary {
-        val index = chart.data.labels.get.indexWhere { l =>
-          val date = l.asInstanceOf[js.Date]
+    annotationContext.annotations.foreach { annotation =>
+      val pointIndex = chart.data.labels.get.indexWhere { label =>
+        val date = label.asInstanceOf[js.Date]
+        (date.getTime - annotation.date.getTime).abs < 1000 * 60 * 20
+      }
 
-          // time frame of 20 minutes since tests run sequentially
-          // includes effekt build time, so this is chosen very broadly
-          (date.getTime - annotation.date.getTime).abs < 1000 * 60 * 20
-        }
+      if (pointIndex >= 0) {
+        val dataset = chart.getDatasetMeta(0)
+        val xPosition = dataset.data(pointIndex)._model.x
+        val yScale = chart.asInstanceOf[ChartInternals].scales("y-axis-0")
+        drawLine(canvasContext, xPosition, yScale.bottom, yScale.top)
 
         val handlerKey = (chartId, annotation.id)
         annotationContext.annotationClickHandlers.get(handlerKey).foreach { previousHandler =>
@@ -99,42 +99,81 @@ trait Generic(implicit C: AnnotationContext) {
     }
   }
 
+  def chartOptions(chartScales: ChartScales, chartElements: Option[ChartElementsOptions] = None): ChartOptions = new ChartOptions {
+    responsive = true
+    maintainAspectRatio = false
+    animation = new ChartAnimationOptions { duration = 0 }
+    chartElements.foreach(configuredElements => elements = configuredElements)
+    title = new ChartTitleOptions {
+      display = true
+      text = chartTitle
+    }
+    tooltips = new ChartTooltipOptions {
+      callbacks = new ChartTooltipCallback {
+        afterBody = (items: js.Array[ChartTooltipItem], _: ChartData) =>
+          if (items.isEmpty) js.Array("")
+          else items(0).index.map(index => tooltipBody(index.toInt)).getOrElse(js.Array(""))
+      }
+    }
+    legend = new ChartLegendOptions { display = false }
+    onClick = clickHandler
+    scales = chartScales
+  }
+
+  def lineElements: ChartElementsOptions = new ChartElementsOptions {
+    point = new ChartPointOptions { radius = 0; hitRadius = 5 }
+    line = new ChartLineOptions { tension = 0 }
+  }
+
   def drawPlot(legend: HtmlElement, chartConfig: ChartConfiguration): HtmlElement =
-    var optChart: Option[Chart] = None
+    var mountedChart: Option[Chart] = None
     canvasTag(
       onMountUnmountCallback(
-        mount = { nodeCtx => 
-          val ctx = nodeCtx.thisNode.ref
-          val plugin = PluginServiceRegistrationOptions().setBeforeDatasetDraw(
-            annotationPlugin
-          )
-          val extendedConfig = chartConfig.set("plugins", js.Array(plugin))
-          val chart = Chart.apply.newInstance2(ctx, extendedConfig)
+        mount = { nodeCtx =>
+          val canvas = nodeCtx.thisNode.ref
+          val pluginRegistration = PluginServiceRegistrationOptions().setBeforeDatasetDraw(annotationPlugin)
+          val configurationWithAnnotations = chartConfig.set("plugins", js.Array(pluginRegistration))
+          val chart = Chart.apply.newInstance2(canvas, configurationWithAnnotations)
           legend.ref.innerHTML = chart.generateLegend().toString()
-          legend.ref.children(0).children.zipWithIndex.foreach { (child, index) =>
-            child.addEventListener("click", _ => {
-              val meta = chart.getDatasetMeta(index)
-              meta.hidden = !meta.hidden.getOrElse(true)
+          legend.ref.children(0).children.zipWithIndex.foreach { (legendItem, datasetIndex) =>
+            legendItem.addEventListener("click", _ => {
+              val dataset = chart.getDatasetMeta(datasetIndex)
+              dataset.hidden = !dataset.hidden.getOrElse(true)
               chart.update()
-              child.classList.toggle("legend-unselected")
+              legendItem.classList.toggle("legend-unselected")
             })
           }
-          optChart = Some(chart)
+          mountedChart = Some(chart)
         },
-        unmount = { thisNode => 
-          optChart.map { _.destroy() }
-          optChart = None
+        unmount = { _ =>
+          mountedChart.foreach(_.destroy())
+          mountedChart = None
         }
       )
     )
 
   def draw(): HtmlElement = {
-    val legend = div(className := "legend")
     chartConfigOpt.map { chartConfig =>
-      div(
-        legend,
-        drawPlot(legend, chartConfig)
-      )
+      val legend = div(className := "legend")
+      div(legend, drawPlot(legend, chartConfig))
     }.getOrElse(div())
   }
+}
+
+@js.native
+trait ChartInternals extends js.Object {
+  val id: Int = js.native
+  val scales: js.Dictionary[ChartScale] = js.native
+}
+
+@js.native
+trait ChartScale extends js.Object {
+  val top: Double = js.native
+  val bottom: Double = js.native
+}
+
+@js.native
+trait ChartElement extends js.Object {
+  val `_chart`: Chart = js.native
+  val `_index`: Int = js.native
 }

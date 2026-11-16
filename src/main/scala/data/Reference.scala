@@ -3,67 +3,43 @@ package data
 import plots.Bar
 import scala.scalajs.js
 import typings.chartJs.mod.*
-import utils.Color
-import utils.AnnotationContext
-import js.JSConverters._
+import utils.{AnnotationContext, Fields, Json, ReferenceMetric}
 
-class Reference(benchmark: String, d: js.Dynamic)(implicit C: AnnotationContext) extends Bar {
+class Reference(benchmark: String, referenceResults: Fields[Fields[ReferenceMetric]])(implicit annotationContext: AnnotationContext) extends Bar {
   override def chartTitle: String = "Effekt vs. Reference: " + benchmark
   override def xLabel = "language"
   override def yLabel = "time in seconds (normalized)"
 
-  override def tooltipBody(idx: Int) = {
-    val languages = filterLanguages()
-    val obj = d.selectDynamic(languages(idx)).selectDynamic(benchmark)
+  private case class LanguageResult(language: String, measurement: ReferenceMetric)
+
+  private lazy val measurements = Json.keys(referenceResults)
+    .filter(language => language != "meta" && referenceResults(language).contains(benchmark))
+    .map(language => LanguageResult(language, referenceResults(language)(benchmark)))
+
+  override def tooltipBody(index: Int) = {
+    val measurement = measurements(index).measurement
     js.Array(
-      f"Arg: ${obj.arg}",
-      f"Mean: ${obj.mean}",
-      f"Stddev: ${obj.stddev}"
+      s"Arg: ${measurement.arg}",
+      s"Mean: ${measurement.mean.toOption.map(_.toString).getOrElse("n/a")}",
+      s"Stddev: ${measurement.stddev.toOption.map(_.toString).getOrElse("n/a")}"
     )
   }
 
-  def filterLanguages() =
-    js.Object.keys(d.asInstanceOf[js.Object]).filter { language =>
-      d.selectDynamic(language).asInstanceOf[js.Object]
-        .hasOwnProperty(benchmark) && language != "meta"
-    }.map(_.toString)
-
-  def getLanguage(language: String) =
-    d.selectDynamic(language).selectDynamic(benchmark)
-
   def chartDataOpt = {
-    val normalizationOrder = Array("effekt_llvm", "effekt_js")
+    if (measurements.isEmpty) return None
 
-    val languages = filterLanguages()
-
-    if (languages.isEmpty) return None
-
-    val normalizationValue = normalizationOrder.map(getLanguage).filter { obj =>
-      obj.asInstanceOf[js.Object].hasOwnProperty("mean")
-    }.headOption.map(_.mean.asInstanceOf[Double]).getOrElse(1.0)
-
-    val successfulRuns = languages.map(getLanguage).map {
-      _.asInstanceOf[js.Object].hasOwnProperty("mean")
-    }
-    val maxValue = successfulRuns.zip(languages).filter(_._1)
-      .map((_, language) => getLanguage(language).mean.asInstanceOf[Double])
-      .max * (1.0 / normalizationValue)
+    val normalizationValue = js.Array("effekt_llvm", "effekt_js")
+      .flatMap(language => referenceResults.get(language).flatMap(_.get(benchmark)).flatMap(_.mean.toOption).toList)
+      .headOption.getOrElse(1.0)
+    val normalizedValues = measurements.map(_.measurement.mean.toOption.map(_ / normalizationValue))
+    val highestValue = normalizedValues.collect { case Some(value) => value }.maxOption.getOrElse(0.0)
 
     Some(new ChartData {
-      labels = languages.map { l => l }
-      datasets = js.Array(
-        new ChartDataSets {
-          data = successfulRuns.zip(languages).map {
-            case (true, language) =>
-              (1.0 / normalizationValue) * getLanguage(language).mean.asInstanceOf[Double]
-            case (false, _) => maxValue
-          }
-          backgroundColor = successfulRuns.zip(colorScheme.scheme.toJSArray).map {
-            case (true, color) => color
-            case (false, color) => "rgba(0, 0, 0, 0.1)"
-          }
-        }
-      )
+      labels = measurements.map(_.language)
+      datasets = js.Array(new ChartDataSets {
+        data = normalizedValues.map(_.getOrElse(highestValue))
+        backgroundColor = normalizedValues.map(_.fold("rgba(0, 0, 0, 0.1)")(_ => colorScheme.nextColor()))
+      })
     })
   }
 }

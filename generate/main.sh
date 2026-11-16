@@ -15,6 +15,7 @@ set -e
 ./backends.sh | ./append.sh backends
 
 # generate index
+./commits.sh >../data/commits.json
 cd ../data/
 find * -type f -name "*.json" -printf "\"%p\"\n" | jq -s . >index.json
 

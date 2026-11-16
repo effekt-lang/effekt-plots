@@ -3,33 +3,29 @@ package utils
 import scalajs.js
 
 trait Preprocessor {
-  def filter(data: js.Array[js.Dynamic]): js.Array[js.Dynamic]
+  def filter[T <: TimedPoint](data: js.Array[T]): js.Array[T]
 }
 
 class TimePreprocessor(matches: js.Date => Boolean) extends Preprocessor {
-  def filter(data: js.Array[js.Dynamic]) =
-    data.filter { e =>
-      val date = new js.Date(e.meta.currentDate.asInstanceOf[String].toDouble * 1000)
-      matches(date)
-    }
+  def filter[T <: TimedPoint](data: js.Array[T]) = data.filter(point => matches(Json.date(point)))
 }
 
-class SubstitutionPreprocessor(matches: String => Boolean, substitute: String => String) extends Preprocessor {
-  def filter(data: js.Array[js.Dynamic]) =
-    data.map { dyn =>
+class SubstitutionPreprocessor(includeKey: String => Boolean, renameKey: String => String) extends Preprocessor {
+  private def filteredFields(value: js.Object): js.Object =
+    js.Object.fromEntries(
+      js.Object.entries(Json.fields[js.Any](value))
+        .filter { case js.Tuple2(key, _) => includeKey(key) }
+        .map { case js.Tuple2(key, fieldValue) => js.Tuple2(renameKey(key), fieldValue) }
+    ).asInstanceOf[js.Object]
+
+  def filter[T <: TimedPoint](data: js.Array[T]): js.Array[T] =
+    data.map { point =>
+      val pointFields = Json.fields[js.Object](point)
       js.Object.fromEntries(
-        js.Object.keys(dyn.asInstanceOf[js.Object]).map { (str: String) =>
-          js.Tuple2(
-            str,
-            js.Object.fromEntries(
-              js.Object.entries(dyn.selectDynamic(str).asInstanceOf[js.Object]).filter { case js.Tuple2(key, value) =>
-                matches(key) || str == "meta"
-              }.map { case js.Tuple2(key, value) =>
-                js.Tuple2(substitute(key), value)
-              }
-            )
-          )
+        js.Object.keys(point).filter(_ != "type").map { fieldName =>
+          val fieldValue = if (fieldName == "meta") point.meta else filteredFields(pointFields(fieldName))
+          js.Tuple2(fieldName, fieldValue)
         }
-      ).asInstanceOf[js.Dynamic]
+      ).asInstanceOf[T]
     }
 }
