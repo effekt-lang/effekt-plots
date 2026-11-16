@@ -143,18 +143,20 @@ trait Generic(implicit annotationContext: AnnotationContext) {
               legendItem.classList.toggle("legend-unselected")
             })
           }
-          val hideAll = dom.document.createElement("li")
-          hideAll.innerHTML = "<span class='legend-clear-icon'>✕</span>hide all"
-          hideAll.addEventListener("click", _ => {
-            val datasetIndices = chart.data.datasets.get.indices
-            val hide = !datasetIndices.forall(index => chart.getDatasetMeta(index).hidden.getOrElse(false))
-            datasetIndices.foreach { index =>
-              chart.getDatasetMeta(index).hidden = hide
-              legend.ref.children(0).children(index).classList.toggle("legend-unselected", hide)
-            }
-            chart.update()
-          })
-          legend.ref.children(0).appendChild(hideAll)
+          if (chart.data.datasets.get.exists(_.label.isDefined)) {
+            val hideAll = dom.document.createElement("li")
+            hideAll.innerHTML = "<span class='legend-clear-icon'>✕</span>hide all"
+            hideAll.addEventListener("click", _ => {
+              val datasetIndices = chart.data.datasets.get.indices
+              val hide = !datasetIndices.forall(index => chart.getDatasetMeta(index).hidden.getOrElse(false))
+              datasetIndices.foreach { index =>
+                chart.getDatasetMeta(index).hidden = hide
+                legend.ref.children(0).children(index).classList.toggle("legend-unselected", hide)
+              }
+              chart.update()
+            })
+            legend.ref.children(0).appendChild(hideAll)
+          }
           mountedChart = Some(chart)
         },
         unmount = { _ =>
