@@ -1,0 +1,16 @@
+def iterate(i: int, a: int, f: <> (int) -> int): int {
+    if i == 0 then
+        a
+    else
+        iterate(i - 1, f(a), f)
+}
+
+def run(n: int): int {
+    iterate(n, 0, fun <> (x: int): int { x + 1 })
+}
+
+def main(): int {
+    val n = ~readInt();
+    ~printInt(run(n));
+    0
+}

@@ -1,0 +1,80 @@
+open_c_header "../../primitives.h"
+
+def mandelbrot(size: int): int {
+    val sum = newref {0};
+    val byteAcc = newref {0};
+    val bitNum = newref {0};
+
+    rec def eachY <> (y: int): unit {
+        if y < size then
+            val ci = ~floatSub(~floatDiv(~floatMul(~boxFloat(2.0), ~toDouble(y)), ~toDouble(size)), ~boxFloat(1.0));
+
+            rec def eachX <> (x: int): unit {
+                if x < size then
+                    val zrzr = newref {~boxFloat(0.0)};
+                    val zi = newref {~boxFloat(0.0)};
+                    val zizi = newref {~boxFloat(0.0)};
+
+                    val cr = ~floatSub(~floatDiv(~floatMul(~boxFloat(2.0), ~toDouble(x)), ~toDouble(size)), ~boxFloat(1.5));
+
+                    val z = newref {0};
+                    val notDone = newref {true};
+                    val escape = newref {0};
+
+                    rec def loop <> (): unit {
+                        if notDone[0] && z[0] < 50 then
+                            val zr = ~floatAdd(~floatSub(zrzr[0], zizi[0]), cr);
+                            zi[0] := ~floatAdd(~floatMul(~floatMul(~boxFloat(2.0), zr), zi[0]), ci);
+
+                            zrzr[0] := ~floatMul(zr, zr);
+                            zizi[0] := ~floatMul(zi[0], zi[0]);
+
+                            (if ~floatLt(~boxFloat(4.0), ~floatAdd(zrzr[0], zizi[0])) then
+                                notDone[0] := false;
+                                escape[0] := 1
+                            else
+                                ());
+                            z[0] := z[0] + 1;
+                            loop()
+                        else
+                            ()
+                    };
+                    loop();
+
+                    byteAcc[0] := ~bitwiseShl(byteAcc[0], 1) + escape[0];
+                    bitNum[0] := bitNum[0] + 1;
+
+                    (if bitNum[0] == 8 then
+                        sum[0] := ~bitwiseXor(sum[0], byteAcc[0]);
+                        byteAcc[0] := 0;
+                        bitNum[0] := 0
+                    else if x == size - 1 then
+                        byteAcc[0] := ~bitwiseShl(byteAcc[0], 8 - bitNum[0]);
+                        sum[0] := ~bitwiseXor(sum[0], byteAcc[0]);
+                        byteAcc[0] := 0;
+                        bitNum[0] := 0
+                    else
+                        ());
+                    eachX(x + 1)
+                else
+                    ()
+            };
+            eachX(0);
+            eachY(y + 1)
+        else
+            ()
+    };
+    eachY(0);
+
+    sum[0]
+}
+
+def run(n: int): int {
+    mandelbrot(n)
+}
+
+def main(): int {
+    val n = ~readInt();
+    ~printInt(run(n));
+    0
+}

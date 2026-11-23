@@ -1,0 +1,27 @@
+type list =
+    | Nil
+    | Cons of int * list
+
+def replicate(v: int, n: int, a: list): list {
+    if n == 0 then
+        a
+    else
+        replicate(v, n - 1, Cons(v, a))
+}
+
+def useless(i: int, n: int, _: list): int {
+    if i < n then
+        useless(i + 1, n, replicate(0, i, Nil))
+    else
+        i
+}
+
+def run(n: int): int {
+    useless(0, n, Nil)
+}
+
+def main(): int {
+    val n = ~readInt();
+    ~printInt(run(n));
+    0
+}

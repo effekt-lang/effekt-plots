@@ -1,0 +1,41 @@
+def swap(arr: array_t::[int], i: int, j: int): unit {
+    val tmp = ~arrayAt::[int](arr, i);
+    ~arraySet::[int](arr, i, ~arrayAt::[int](arr, j));
+    ~arraySet::[int](arr, j, tmp);
+    ()
+}
+
+def run(n: int): int {
+    val count = newref {0};
+
+    rec def permute <> (arr: array_t::[int], n: int): unit {
+        count[0] := count[0] + 1;
+        if n != 0 then
+            val n1 = n - 1;
+            permute(arr, n1);
+            val i = newref {n1};
+            rec def loop <> (): unit {
+                if !(i[0] < 0) then
+                    swap(arr, n1, i[0]);
+                    permute(arr, n1);
+                    swap(arr, n1, i[0]);
+                    i[0] := i[0] - 1;
+                    loop()
+                else
+                    ()
+            };
+            loop()
+        else
+            ()
+    };
+
+    permute(~arrayMakeInit::[int](n, 1), n);
+
+    count[0]
+}
+
+def main(): int {
+    val n = ~readInt();
+    ~printInt(run(n));
+    0
+}

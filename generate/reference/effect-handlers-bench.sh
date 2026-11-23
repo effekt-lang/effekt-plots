@@ -1,6 +1,8 @@
 #!/bin/env bash
 set -e
 
+ulimit -s 4194304
+
 >&2 echo "::group::$0"
 
 TRACKED="countdown iterator nqueens parsing_dollars product_early resume_nontail tree_explore triples"

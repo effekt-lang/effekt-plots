@@ -1,0 +1,229 @@
+open_c_header "../../primitives.h"
+
+type body =
+    | Body of int * int * int * int * int * int * int
+
+def advance(bodies: array_t::[body], dt: int): unit {
+    rec def eachI <> (i: int): unit {
+        if i < ~arrayLen::[body](bodies) then
+            rec def eachJ <> (j: int): unit {
+                if j < ~arrayLen::[body](bodies) then
+                    val iBody = ~arrayAt::[body](bodies, i);
+                    val jBody = ~arrayAt::[body](bodies, j);
+
+                    (match iBody with
+                    | Body(ix, iy, iz, ivx, ivy, ivz, imass) -> {
+                        match jBody with
+                        | Body(jx, jy, jz, jvx, jvy, jvz, jmass) -> {
+                            val dx = ~floatSub(ix, jx);
+                            val dy = ~floatSub(iy, jy);
+                            val dz = ~floatSub(iz, jz);
+
+                            val dSquared = ~floatAdd(~floatAdd(~floatMul(dx, dx), ~floatMul(dy, dy)), ~floatMul(dz, dz));
+                            val distance = ~floatSqrt(dSquared);
+                            val mag = ~floatDiv(dt, ~floatMul(dSquared, distance));
+
+                            ~arraySet::[body](bodies, i, Body(
+                                ix, iy, iz,
+                                ~floatSub(ivx, ~floatMul(~floatMul(dx, jmass), mag)),
+                                ~floatSub(ivy, ~floatMul(~floatMul(dy, jmass), mag)),
+                                ~floatSub(ivz, ~floatMul(~floatMul(dz, jmass), mag)),
+                                imass
+                            ));
+
+                            ~arraySet::[body](bodies, j, Body(
+                                jx, jy, jz,
+                                ~floatAdd(jvx, ~floatMul(~floatMul(dx, imass), mag)),
+                                ~floatAdd(jvy, ~floatMul(~floatMul(dy, imass), mag)),
+                                ~floatAdd(jvz, ~floatMul(~floatMul(dz, imass), mag)),
+                                jmass
+                            ));
+                            ()
+                        }
+                    });
+                    eachJ(j + 1)
+                else
+                    ()
+            };
+            eachJ(i + 1);
+            eachI(i + 1)
+        else
+            ()
+    };
+    eachI(0);
+
+    rec def each <> (i: int): unit {
+        if i < ~arrayLen::[body](bodies) then
+            (match ~arrayAt::[body](bodies, i) with
+            | Body(x, y, z, vx, vy, vz, mass) -> {
+                ~arraySet::[body](bodies, i, Body(
+                    ~floatAdd(x, ~floatMul(dt, vx)),
+                    ~floatAdd(y, ~floatMul(dt, vy)),
+                    ~floatAdd(z, ~floatMul(dt, vz)),
+                    vx,
+                    vy,
+                    vz,
+                    mass
+                ));
+                ()
+            });
+            each(i + 1)
+        else
+            ()
+    };
+    each(0)
+}
+
+def energy(bodies: array_t::[body]): int {
+    val e = newref {~boxFloat(0.0)};
+    rec def eachI <> (i: int): unit {
+        if i < ~arrayLen::[body](bodies) then
+            (match ~arrayAt::[body](bodies, i) with
+            | Body(ix, iy, iz, ivx, ivy, ivz, imass) -> {
+                e[0] := ~floatAdd(e[0], ~floatMul(~floatMul(~boxFloat(0.5), imass), ~floatAdd(~floatAdd(~floatMul(ivx, ivx), ~floatMul(ivy, ivy)), ~floatMul(ivz, ivz))));
+
+                rec def eachJ <> (j: int): unit {
+                    if j < ~arrayLen::[body](bodies) then
+                        (match ~arrayAt::[body](bodies, j) with
+                        | Body(jx, jy, jz, jvx, jvy, jvz, jmass) -> {
+                            val dx = ~floatSub(ix, jx);
+                            val dy = ~floatSub(iy, jy);
+                            val dz = ~floatSub(iz, jz);
+
+                            val distance = ~floatSqrt(~floatAdd(~floatAdd(~floatMul(dx, dx), ~floatMul(dy, dy)), ~floatMul(dz, dz)));
+                            e[0] := ~floatSub(e[0], ~floatDiv(~floatMul(imass, jmass), distance))
+                        });
+                        eachJ(j + 1)
+                    else
+                        ()
+                };
+                eachJ(i + 1)
+            });
+            eachI(i + 1)
+        else
+            ()
+    };
+    eachI(0);
+    e[0]
+}
+
+def run(n: int): int {
+
+    val pi = ~parseDouble("3.141592653589793");
+    val solarMass = ~floatMul(~floatMul(~boxFloat(4.0), pi), pi);
+    val daysPerYear = ~boxFloat(365.24);
+
+    rec def makeBody <> (
+            x: int,
+            y: int,
+            z: int,
+            vx: int,
+            vy: int,
+            vz: int,
+            mass: int): body {
+        Body(x, y, z, ~floatMul(vx, daysPerYear), ~floatMul(vy, daysPerYear), ~floatMul(vz, daysPerYear), ~floatMul(mass, solarMass))
+    };
+
+    val jupiter = makeBody(
+        ~parseDouble("4.84143144246472090"),
+        ~parseDouble("-1.16032004402742839"),
+        ~parseDouble("-0.10362204447112311"),
+        ~parseDouble("0.001660076642744037"),
+        ~parseDouble("0.007699011184197404"),
+        ~parseDouble("-0.0000690460016972063"),
+        ~parseDouble("0.0009547919384243266")
+    );
+
+    val saturn = makeBody(
+        ~parseDouble("8.34336671824458"),
+        ~parseDouble("4.124798564124305"),
+        ~parseDouble("-0.4035234171143214"),
+        ~parseDouble("-0.002767425107268624"),
+        ~parseDouble("0.004998528012349172"),
+        ~parseDouble("0.00002304172975737639"),
+        ~parseDouble("0.0002858859806661308")
+    );
+
+    val uranus = makeBody(
+        ~parseDouble("12.89436956213913"),
+        ~parseDouble("-15.11115140169863"),
+        ~parseDouble("-0.22330757889265574"),
+        ~parseDouble("0.002964601375647616"),
+        ~parseDouble("0.0023784717395948095"),
+        ~parseDouble("-0.000029658956854023755"),
+        ~parseDouble("0.00004366244043351563")
+    );
+
+    val neptune = makeBody(
+        ~parseDouble("15.379697114850917"),
+        ~parseDouble("-25.919314609987964"),
+        ~parseDouble("0.17925877295037118"),
+        ~parseDouble("0.002680677724903893"),
+        ~parseDouble("0.001628241700382423"),
+        ~parseDouble("-0.00009515922545197159"),
+        ~parseDouble("0.00005151389020466115")
+    );
+
+    val sun = makeBody(~boxFloat(0.0), ~boxFloat(0.0), ~boxFloat(0.0), ~boxFloat(0.0), ~boxFloat(0.0), ~boxFloat(0.0), ~boxFloat(1.0));
+
+    rec def createBodies <> (): array_t::[body] {
+        val bodies = ~arrayMake::[body](5);
+
+        ~arraySet::[body](bodies, 0, sun);
+        ~arraySet::[body](bodies, 1, jupiter);
+        ~arraySet::[body](bodies, 2, saturn);
+        ~arraySet::[body](bodies, 3, uranus);
+        ~arraySet::[body](bodies, 4, neptune);
+
+        val px = newref {~boxFloat(0.0)};
+        val py = newref {~boxFloat(0.0)};
+        val pz = newref {~boxFloat(0.0)};
+
+        rec def foreach <> (i: int): unit {
+            if i < ~arrayLen::[body](bodies) then
+                (match ~arrayAt::[body](bodies, i) with
+                | Body(x, y, z, vx, vy, vz, mass) -> {
+                    px[0] := ~floatAdd(px[0], ~floatMul(vx, mass));
+                    py[0] := ~floatAdd(py[0], ~floatMul(vy, mass));
+                    pz[0] := ~floatAdd(pz[0], ~floatMul(vz, mass))
+                });
+                foreach(i + 1)
+            else
+                ()
+        };
+        foreach(0);
+
+        rec def offsetMomentum <> (body: body, px: int, py: int, pz: int): body {
+            match body with
+            | Body(x, y, z, vx, vy, vz, mass) -> {
+                Body(
+                    x, y, z,
+                    ~floatSub(~boxFloat(0.0), ~floatDiv(px, solarMass)),
+                    ~floatSub(~boxFloat(0.0), ~floatDiv(py, solarMass)),
+                    ~floatSub(~boxFloat(0.0), ~floatDiv(pz, solarMass)),
+                    mass)
+            }
+        };
+
+        ~arraySet::[body](bodies, 0, offsetMomentum(sun, px[0], py[0], pz[0]));
+
+        bodies
+    };
+
+    val bodies = createBodies();
+    rec def each <> (i: int): unit {
+        if i < n then
+            advance(bodies, ~boxFloat(0.01));
+            each(i + 1)
+        else
+            ()
+    };
+    each(0);
+    ~toInt(~floatMul(energy(bodies), ~boxFloat(1000000000.0)))
+}
+
+def main(): int {
+    val n = ~readInt();
+    ~printInt(run(n));
+    0
+}

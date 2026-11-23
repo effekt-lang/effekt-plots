@@ -1,0 +1,27 @@
+type tree =
+    | Leaf of int
+    | Node of tree * tree
+
+def create(i: int, n: int): tree {
+    if i < n then
+        val t = create(i + 1, n);
+        Node(t, t)
+    else
+        Leaf(n)
+}
+
+def lookup(t: tree): int {
+    match t with
+    | Leaf(v) -> { v }
+    | Node(l, _) -> { lookup(l) }
+}
+
+def run(n: int): int {
+    lookup(create(0, n))
+}
+
+def main(): int {
+    val n = ~readInt();
+    ~printInt(run(n));
+    0
+}

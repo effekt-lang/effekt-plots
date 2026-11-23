@@ -1,0 +1,74 @@
+type list =
+    | Nil
+    | Cons of int * list
+
+def run(n: int): int {
+
+    val movesDone = newref {0};
+    val towers = newref {~arrayMakeInit::[list](3, Nil)};
+
+    rec def pushDisk <> (newTopDiskOnPile: int, pileIdx: int): unit {
+        val pile = ~arrayAt::[list](towers[0], pileIdx);
+        (match pile with
+        | Cons(topDiskOnStack, _) -> {
+            if !(newTopDiskOnPile < topDiskOnStack) then
+                ~error::[unit]("Cannot put a big disk onto a smaller one")
+            else
+                ()
+        }
+        | Nil -> { () });
+        ~arraySet::[list](towers[0], pileIdx, Cons(newTopDiskOnPile, pile));
+        ()
+    };
+
+    rec def popDisk <> (pileIdx: int): int {
+        val pile = ~arrayAt::[list](towers[0], pileIdx);
+
+        match pile with
+        | Nil -> {
+            ~error::[int]("Attempting to remove a disk from an empty pile")
+        }
+        | Cons(disk, next) -> {
+            ~arraySet::[list](towers[0], pileIdx, next);
+            disk
+        }
+    };
+
+    rec def moveTopDisk <> (fromPile: int, ontoPile: int): unit {
+        pushDisk(popDisk(fromPile), ontoPile);
+        movesDone[0] := movesDone[0] + 1
+    };
+
+    rec def moveDisks <> (disks: int, fromPile: int, ontoPile: int): unit {
+        if disks == 1 then
+            moveTopDisk(fromPile, ontoPile)
+        else
+            val otherPile = (3 - fromPile) - ontoPile;
+            moveDisks(disks - 1, fromPile, otherPile);
+            moveTopDisk(fromPile, ontoPile);
+            moveDisks(disks - 1, otherPile, ontoPile)
+    };
+
+    rec def buildTowerAt <> (pileIdx: int, n: int): unit {
+        val i = newref {n};
+        rec def loop <> (): unit {
+            if !(i[0] < 0) then
+                pushDisk(i[0], pileIdx);
+                i[0] := i[0] - 1;
+                loop()
+            else
+                ()
+        };
+        loop()
+    };
+
+    (buildTowerAt(0, n);
+    moveDisks(n, 0, 1);
+    movesDone[0])
+}
+
+def main(): int {
+    val n = ~readInt();
+    ~printInt(run(n));
+    0
+}

@@ -1,6 +1,8 @@
 #!/bin/env bash
 set -e
 
+ulimit -s 4194304
+
 >&2 echo "::group::$0"
 
 # are-we-fast-yet uses different filenames than we do!
@@ -10,19 +12,25 @@ PREFIX="are_we_fast_yet"
 
 ARR_RENAMED=($RENAMED)
 
-# TODO: Should we somehow sync the arguments here?
+# TODO: Should we somehow sync all arguments here?
 # TODO: we could supply a outer and inner loop iteration count to harness.*
-# CONFIG_FILE="../../../../../effekt/examples/benchmarks/config_default.txt"
+
+CONFIG_FILE="$(pwd)/../effekt/examples/benchmarks/config_default.txt"
 
 # Hyperfine can only write JSON to files
 tmpfile=$(mktemp /tmp/hyperfine_are-we-fast-yet.XXXXX)
 
-# command -> json
+# name -> number
+get_arg() {
+	grep "$PREFIX/$1" "$CONFIG_FILE" | awk '{print $2}'
+}
+
+# command -> arg (0 = harness default) -> json
 benchmark() {
 	if hyperfine --export-json "$tmpfile" "$1" >&2; then
-		jq "{mean: .results[0].mean, stddev: .results[0].stddev, arg: 0}" "$tmpfile"
+		jq "{mean: .results[0].mean, stddev: .results[0].stddev, arg: ${2:-0}}" "$tmpfile"
 	else
-		echo "{\"arg\": 0}"
+		echo "{\"arg\": ${2:-0}}"
 	fi
 }
 
@@ -100,6 +108,36 @@ i=0
 		benchmark "./harness $benchmark"
 		echo "}"
 		i=$((i + 1))
+	done
+} | jq -s 'add'
+
+echo ","
+>&2 echo "::endgroup::"
+
+# --- Lexa benchmarks ---
+>&2 echo "::group::lexa"
+cd ../../../
+
+LEXA_BENCHMARKS="$(pwd)/lexa-benchmarks/$PREFIX"
+
+[ -d lexa ] || git clone https://github.com/lexa-lang/lexa.git >&2
+cd lexa/
+
+nix develop .#userShell --accept-flake-config --ignore-environment --keep HOME --command bash -c "
+	for benchmark in $RENAMED; do
+		./lexa $LEXA_BENCHMARKS/\$benchmark/main.lx -o $LEXA_BENCHMARKS/\$benchmark/main
+	done
+" >&2
+
+cd "$LEXA_BENCHMARKS"
+
+echo "\"lexa\":"
+{
+	for benchmark in $RENAMED; do
+		echo "{\"$PREFIX/$benchmark\":"
+		arg=$(get_arg "$benchmark")
+		benchmark "./$benchmark/main $arg" "$arg"
+		echo "}"
 	done
 } | jq -s 'add'
 

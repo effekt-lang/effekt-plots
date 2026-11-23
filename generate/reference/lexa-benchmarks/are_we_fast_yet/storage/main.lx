@@ -1,0 +1,56 @@
+type tree =
+    | Leaf of array_t::[int]
+    | Node of tree * tree * tree * tree
+
+effect Random {
+    next: () -> int
+}
+
+def bitAnd(x: int, y: int): int {
+    x % (y + 1)
+}
+
+def withRandom::['r] (program: <> [; rand: Random] () -> 'r): 'r {
+    val seed = newref {74755};
+    handle <> {
+        program:[; rand]()
+    } with rand: Random {
+        def next() {
+            seed[0] := bitAnd((seed[0] * 1309) + 13849, 65535);
+            seed[0]
+        }
+    }
+}
+
+def run(n: int): int {
+    val count = newref {0};
+
+    rec def buildTreeDepth <> [; rand: Random] (depth: int): tree {
+        count[0] := count[0] + 1;
+        if depth == 1 then
+            Leaf(~arrayMakeInit::[int]((raise rand.next()) % 10 + 1, 0))
+        else
+            Node(
+                buildTreeDepth:[; rand](depth - 1),
+                buildTreeDepth:[; rand](depth - 1),
+                buildTreeDepth:[; rand](depth - 1),
+                buildTreeDepth:[; rand](depth - 1))
+    };
+
+    rec def each <> (i: int): unit {
+        if i < n then
+            withRandom::[unit](fun <> [; rand: Random] (): unit { buildTreeDepth:[; rand](7); () });
+            each(i + 1)
+        else
+            ()
+    };
+    each(0);
+
+    count[0]
+}
+
+def main(): int {
+    val n = ~readInt();
+    ~printInt(run(n));
+    0
+}

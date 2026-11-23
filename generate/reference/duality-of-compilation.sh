@@ -1,6 +1,8 @@
 #!/bin/env bash
 set -e
 
+ulimit -s 4194304
+
 >&2 echo "::group::$0"
 
 TRACKED="erase_unused factorial_accumulator fibonacci_recursive iterate_increment lookup_tree match_options sum_range"
@@ -98,6 +100,36 @@ echo "\"ocaml\":"
 		echo "{\"$PREFIX/$benchmark\":"
 		arg=$(get_arg "$benchmark")
 		benchmark "./$benchmark $arg" "$arg"
+		echo "}"
+	done
+} | jq -s 'add'
+
+echo ","
+>&2 echo "::endgroup::"
+
+# --- Lexa benchmarks ---
+>&2 echo "::group::lexa"
+cd ../../
+
+LEXA_BENCHMARKS="$(pwd)/lexa-benchmarks/$PREFIX"
+
+[ -d lexa ] || git clone https://github.com/lexa-lang/lexa.git >&2
+cd lexa/
+
+nix develop .#userShell --accept-flake-config --ignore-environment --keep HOME --command bash -c "
+	for benchmark in $TRACKED; do
+		./lexa $LEXA_BENCHMARKS/\$benchmark/main.lx -o $LEXA_BENCHMARKS/\$benchmark/main
+	done
+" >&2
+
+cd "$LEXA_BENCHMARKS"
+
+echo "\"lexa\":"
+{
+	for benchmark in $TRACKED; do
+		echo "{\"$PREFIX/$benchmark\":"
+		arg=$(get_arg "$benchmark")
+		benchmark "./$benchmark/main $arg" "$arg"
 		echo "}"
 	done
 } | jq -s 'add'

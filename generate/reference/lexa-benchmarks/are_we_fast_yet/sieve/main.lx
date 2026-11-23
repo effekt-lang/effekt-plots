@@ -1,0 +1,32 @@
+def run(size: int): int {
+    val primeCount = newref {0};
+    val flags = ~arrayMakeInit::[bool](size, true);
+    rec def each <> (i: int): unit {
+        if i < size then
+            (if ~arrayAt::[bool](flags, i - 1) then
+                primeCount[0] := primeCount[0] + 1;
+                val k = newref {i + i};
+                rec def loop <> (): unit {
+                    if !(k[0] > size) then
+                        ~arraySet::[bool](flags, k[0] - 1, false);
+                        k[0] := k[0] + i;
+                        loop()
+                    else
+                        ()
+                };
+                loop()
+            else
+                ());
+            each(i + 1)
+        else
+            ()
+    };
+    each(2);
+    primeCount[0]
+}
+
+def main(): int {
+    val n = ~readInt();
+    ~printInt(run(n));
+    0
+}

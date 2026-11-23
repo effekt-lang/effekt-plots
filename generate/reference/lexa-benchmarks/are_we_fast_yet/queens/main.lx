@@ -1,0 +1,62 @@
+effect Break {
+    break_: (bool) -> unit
+}
+
+def run(n: int): int {
+
+    val freeRows = ~arrayMakeInit::[bool](n, true);
+    val freeMaxs = ~arrayMakeInit::[bool](2 * n, true);
+    val freeMins = ~arrayMakeInit::[bool](2 * n, true);
+    val queenRows = ~arrayMakeInit::[int](n, -1);
+
+    rec def getRowColumn <> (r: int, c: int): bool {
+        ~arrayAt::[bool](freeRows, r) && ~arrayAt::[bool](freeMaxs, c + r) && ~arrayAt::[bool](freeMins, c - r + (n - 1))
+    };
+
+    rec def setRowColumn <> (r: int, c: int, v: bool): unit {
+        ~arraySet::[bool](freeRows, r, v);
+        ~arraySet::[bool](freeMaxs, c + r, v);
+        ~arraySet::[bool](freeMins, c - r + (n - 1), v);
+        ()
+    };
+
+    rec def placeQueen <> (c: int): bool {
+        handle <> {
+            rec def each <break_stub> (r: int): unit {
+                if r < n then
+                    (if getRowColumn(r, c) then
+                        ~arraySet::[int](queenRows, r, c);
+                        setRowColumn(r, c, false);
+
+                        (if c == (n - 1) then
+                            raise break_stub.break_(true)
+                        else
+                            ());
+
+                        (if placeQueen(c + 1) then
+                            raise break_stub.break_(true)
+                        else
+                            ());
+                        setRowColumn(r, c, true)
+                    else
+                        ());
+                    each(r + 1)
+                else
+                    ()
+            };
+            each(0);
+            false
+        } with break_stub: Break {
+            exc break_(value) { value }
+        }
+    };
+
+    if placeQueen(0) then 1 else 0
+
+}
+
+def main(): int {
+    val n = ~readInt();
+    ~printInt(run(n));
+    0
+}

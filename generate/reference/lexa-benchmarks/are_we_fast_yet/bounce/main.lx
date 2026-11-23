@@ -1,0 +1,103 @@
+open_c_header "../../primitives.h"
+
+effect Random {
+    next: () -> int
+}
+
+def randomBall [; rand: Random] (): <> () -> bool {
+    val x = newref {~toDouble((raise rand.next()) % 500)};
+    val y = newref {~toDouble((raise rand.next()) % 500)};
+    val xVel = newref {~toDouble((raise rand.next()) % 300 - 150)};
+    val yVel = newref {~toDouble((raise rand.next()) % 300 - 150)};
+    fun <> (): bool {
+        val xLimit = ~boxFloat(500.0);
+        val yLimit = ~boxFloat(500.0);
+        val bounced = newref {false};
+        x[0] := ~floatAdd(x[0], xVel[0]);
+        y[0] := ~floatAdd(y[0], yVel[0]);
+
+        (if ~floatLt(xLimit, x[0]) then
+            x[0] := xLimit;
+            xVel[0] := ~floatNeg(~floatAbs(xVel[0]));
+            bounced[0] := true
+        else
+            ());
+        (if ~floatLt(x[0], ~boxFloat(0.0)) then
+            x[0] := ~boxFloat(0.0);
+            xVel[0] := ~floatAbs(xVel[0]);
+            bounced[0] := true
+        else
+            ());
+        (if ~floatLt(yLimit, y[0]) then
+            y[0] := yLimit;
+            yVel[0] := ~floatNeg(~floatAbs(yVel[0]));
+            bounced[0] := true
+        else
+            ());
+        (if ~floatLt(y[0], ~boxFloat(0.0)) then
+            y[0] := ~boxFloat(0.0);
+            yVel[0] := ~floatAbs(yVel[0]);
+            bounced[0] := true
+        else
+            ());
+
+        bounced[0]
+    }
+}
+
+def withRandom::['r] (program: <> [; rand: Random] () -> 'r): 'r {
+    val seed = newref {74755};
+    handle <> {
+        program:[; rand]()
+    } with rand: Random {
+        def next() {
+            seed[0] := ~bitwiseAnd((seed[0] * 1309) + 13849, 65535);
+            seed[0]
+        }
+    }
+}
+
+def run(n: int): int {
+    withRandom::[int](fun <> [; rand: Random] (): int {
+        val ballCount = 100;
+        val bounces = newref {0};
+        val balls = ~arrayMake::[<> () -> bool](ballCount);
+        rec def build <rand> (i: int): unit {
+            if i < ballCount then
+                ~arraySet::[<> () -> bool](balls, i, randomBall:[; rand]());
+                build(i + 1)
+            else
+                ()
+        };
+        build(0);
+
+        rec def eachIteration <> (i: int): unit {
+            if i < n then
+                rec def eachBall <> (i: int): unit {
+                    if i < ballCount then
+                        val ball = ~arrayAt::[<> () -> bool](balls, i);
+                        val didBounce = ball();
+                        (if didBounce then
+                            bounces[0] := bounces[0] + 1
+                        else
+                            ());
+                        eachBall(i + 1)
+                    else
+                        ()
+                };
+                eachBall(0);
+                eachIteration(i + 1)
+            else
+                ()
+        };
+        eachIteration(0);
+
+        bounces[0]
+    })
+}
+
+def main(): int {
+    val n = ~readInt();
+    ~printInt(run(n));
+    0
+}

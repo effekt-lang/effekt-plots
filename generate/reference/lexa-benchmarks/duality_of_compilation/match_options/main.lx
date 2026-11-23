@@ -1,0 +1,24 @@
+type option =
+    | None
+    | Some of int
+
+def attempt(i: int): option {
+    if i == 0 then
+        Some(i)
+    else
+        match attempt(i - 1) with
+        | Some(x) -> { Some(x + 1) }
+        | None -> { None }
+}
+
+def run(n: int): int {
+    match attempt(n) with
+    | Some(x) -> { x }
+    | None -> { -1 }
+}
+
+def main(): int {
+    val n = ~readInt();
+    ~printInt(run(n));
+    0
+}

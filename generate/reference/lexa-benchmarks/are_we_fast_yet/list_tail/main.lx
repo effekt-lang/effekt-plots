@@ -1,0 +1,59 @@
+type list =
+    | Nil
+    | Cons of int * list
+
+def length(xs: list): int {
+    match xs with
+    | Nil -> { 0 }
+    | Cons(y, ys) -> { 1 + length(ys) }
+}
+
+def isShorterThan(x: list, y: list): bool {
+    match y with
+    | Nil -> { false }
+    | Cons(_, ys) -> {
+        match x with
+        | Nil -> { true }
+        | Cons(_, xs) -> { isShorterThan(xs, ys) }
+    }
+}
+
+def makeList(n: int): list {
+    if n == 0 then
+        Nil
+    else
+        Cons(n, makeList(n - 1))
+}
+
+def tail(xs: list, ys: list, zs: list): list {
+    if isShorterThan(ys, xs) then
+        match xs with
+        | Nil -> { ~error::[list]("oh no!") }
+        | Cons(_, xsTail) -> {
+            match ys with
+            | Nil -> { ~error::[list]("oh no!") }
+            | Cons(_, ysTail) -> {
+                match zs with
+                | Nil -> { ~error::[list]("oh no!") }
+                | Cons(_, zsTail) -> {
+                    tail(
+                        tail(xsTail, ys, zs),
+                        tail(ysTail, zs, xs),
+                        tail(zsTail, xs, ys)
+                    )
+                }
+            }
+        }
+    else
+        zs
+}
+
+def run(n: int): int {
+    length(tail(makeList(n), makeList(10), makeList(6)))
+}
+
+def main(): int {
+    val n = ~readInt();
+    ~printInt(run(n));
+    0
+}

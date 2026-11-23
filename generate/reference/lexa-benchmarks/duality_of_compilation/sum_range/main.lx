@@ -1,0 +1,26 @@
+type list =
+    | Nil
+    | Cons of int * list
+
+def range(i: int, n: int): list {
+    if i < n then
+        Cons(i, range(i + 1, n))
+    else
+        Nil
+}
+
+def sum(xs: list): int {
+    match xs with
+    | Nil -> { 0 }
+    | Cons(y, ys) -> { y + sum(ys) }
+}
+
+def run(n: int): int {
+    sum(range(0, n))
+}
+
+def main(): int {
+    val n = ~readInt();
+    ~printInt(run(n));
+    0
+}

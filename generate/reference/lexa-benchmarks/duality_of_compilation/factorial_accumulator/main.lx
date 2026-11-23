@@ -1,0 +1,16 @@
+def factorial(a: int, i: int): int {
+    if i == 0 then
+        a
+    else
+        factorial((i * a) % 1000000007, i - 1)
+}
+
+def run(n: int): int {
+    factorial(1, n)
+}
+
+def main(): int {
+    val n = ~readInt();
+    ~printInt(run(n));
+    0
+}

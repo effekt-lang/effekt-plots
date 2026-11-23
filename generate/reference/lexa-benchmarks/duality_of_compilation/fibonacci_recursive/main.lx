@@ -1,0 +1,18 @@
+def fibonacci(i: int): int {
+    if i == 0 then
+        0
+    else if i == 1 then
+        1
+    else
+        fibonacci(i - 1) + fibonacci(i - 2)
+}
+
+def run(n: int): int {
+    fibonacci(n)
+}
+
+def main(): int {
+    val n = ~readInt();
+    ~printInt(run(n));
+    0
+}
